@@ -117,10 +117,16 @@ export async function incrementVideoView(id: string): Promise<Video | null> {
   return mapApiVideoToVideo(data, apiBase);
 }
 
+/** Response shape from the reaction endpoint (includes userReaction) */
+export interface ReactionResponse {
+  video: Video;
+  userReaction: 'like' | 'dislike' | null;
+}
+
 export async function updateVideoReaction(
   id: string,
   type: 'like' | 'dislike'
-): Promise<Video | null> {
+): Promise<ReactionResponse | null> {
   const base = getApiBase();
   const url = base ? `${base}/api/videos/${id}/react` : `/api/videos/${id}/react`;
   const token = getAuthToken();
@@ -136,9 +142,28 @@ export async function updateVideoReaction(
   if (!res.ok) {
     throw new Error(`Failed to update reaction: ${res.status}`);
   }
-  const data: ApiVideo = await res.json();
+  const data = await res.json();
   const apiBase = base || (typeof window !== 'undefined' ? window.location.origin : '');
-  return mapApiVideoToVideo(data, apiBase);
+  return {
+    video: mapApiVideoToVideo(data, apiBase),
+    userReaction: data.userReaction ?? null,
+  };
+}
+
+/** Fetch the current user's reaction (like/dislike/null) for a specific video. */
+export async function getUserReactionStatus(videoId: string): Promise<'like' | 'dislike' | null> {
+  const base = getApiBase();
+  const url = base ? `${base}/api/videos/${videoId}/reaction` : `/api/videos/${videoId}/reaction`;
+  const token = getAuthToken();
+  if (!token) return null;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.reaction ?? null;
 }
 
 /** Response shape from the subscribe endpoint */

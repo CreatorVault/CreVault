@@ -27,6 +27,7 @@ import {
   updateVideoReaction,
   updateVideoSubscribers,
   checkSubscriptionStatus,
+  getUserReactionStatus,
   deleteVideo,
 } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -152,10 +153,25 @@ const Watch = () => {
       .catch(() => { });
   }, [videoId, isAuthenticated]);
 
+  // Fetch existing user reaction on load (restores like/dislike state after re-login)
+  useEffect(() => {
+    if (!videoId || !isAuthenticated) {
+      setUserReaction(null);
+      return;
+    }
+    getUserReactionStatus(videoId)
+      .then((reaction) => {
+        setUserReaction(reaction);
+      })
+      .catch(() => {
+        setUserReaction(null);
+      });
+  }, [videoId, isAuthenticated]);
+
   const videoComments = mockComments.filter(c => c.videoId === videoId);
 
   const handleViewStart = () => {
-    if (!video || !isAuthenticated || hasRecordedView) return;
+    if (!video || hasRecordedView) return;
 
     setHasRecordedView(true);
     // Optimistic update
@@ -200,10 +216,12 @@ const Watch = () => {
 
     // Single API call — backend handles toggle/switch logic internally
     updateVideoReaction(video.id, type)
-      .then((updated) => {
-        if (updated) {
-          setLikes(updated.likes);
-          setDislikes(updated.dislikes);
+      .then((result) => {
+        if (result) {
+          // Sync with authoritative backend values
+          setLikes(result.video.likes);
+          setDislikes(result.video.dislikes);
+          setUserReaction(result.userReaction);
         }
       })
       .catch(() => { });
@@ -309,7 +327,7 @@ const Watch = () => {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-6 p-4 lg:flex-row lg:p-6">
+      <div className="flex flex-col gap-6 lg:flex-row lg:p-6">
         {/* Main content */}
         <div className="flex-1">
           {/* Video Player */}
@@ -320,7 +338,7 @@ const Watch = () => {
           />
 
           {/* Video info */}
-          <div className="mt-4">
+          <div className="mt-4 px-4 lg:px-0">
             <div className="flex items-start justify-between">
               <h1 className="text-xl font-semibold text-foreground lg:text-2xl">
                 {video.title}
@@ -458,7 +476,7 @@ const Watch = () => {
         </div>
 
         {/* Sidebar - Related videos */}
-        <aside className="w-full shrink-0 lg:w-96">
+        <aside className="w-full shrink-0 px-4 lg:w-96 lg:px-0">
           <h3 className="mb-4 font-semibold text-foreground">Related Videos</h3>
           <div className="space-y-4">
             {relatedVideos.map(v => (

@@ -22,7 +22,7 @@ const ViewSchema: Schema = new Schema(
     { timestamps: true }
 );
 
-// Ensure a user can only have one view counted per video
-ViewSchema.index({ user: 1, video: 1 }, { unique: true });
+// Compound index for fast lookups (not unique — allows multiple views over time)
+ViewSchema.index({ user: 1, video: 1, createdAt: -1 });
 
 export default mongoose.model<IView>("View", ViewSchema);

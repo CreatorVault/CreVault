@@ -9,18 +9,23 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, hideSidebar = false }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
 
   return (
     <div className="min-h-screen bg-background">
       <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
-      
-      {!hideSidebar && <Sidebar isOpen={sidebarOpen} />}
-      
+
+      {!hideSidebar && (
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      )}
+
       <main
         className={cn(
           'min-h-[calc(100vh-4rem)] pt-16 transition-all duration-300',
-          !hideSidebar && (sidebarOpen ? 'ml-60' : 'ml-[72px]')
+          !hideSidebar && (sidebarOpen ? 'md:ml-60' : 'md:ml-[72px]')
         )}
       >
         {children}

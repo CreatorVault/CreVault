@@ -54,29 +54,36 @@ export const getVideoById = async (req: Request, res: Response) => {
 };
 
 export const incrementViews = async (req: Request, res: Response) => {
-  const userId = (req as any).user?.id; // Optional: tracked view if logged in
+  const userId = (req as any).user?.id; // Optional: present if logged in
   const videoId = req.params.id;
 
   try {
     let video = await Video.findById(videoId);
     if (!video) return res.status(404).json({ message: "Video not found" });
 
-    // If user is logged in, check for unique view
+    let shouldIncrement = false;
+
     if (userId) {
-      const existingView = await View.findOne({ user: userId, video: videoId });
-      if (!existingView) {
+      // Authenticated user – allow one view per 24 hours per video
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const recentView = await View.findOne({
+        user: userId,
+        video: videoId,
+        createdAt: { $gte: twentyFourHoursAgo },
+      });
+      if (!recentView) {
         await View.create({ user: userId, video: videoId });
-        video.views += 1;
-        await video.save();
-        getIO(req).to(`video_${videoId}`).emit("view_updated", { views: video.views });
+        shouldIncrement = true;
       }
     } else {
-      // Anonymous view (simple increment, or you could use IP/Session checks but keeping it simple)
-      // For now, let's only count unique views for logged in users as requested "one view per user"
-      // If anonymous views are allowed, uncomment below:
-      // video.views += 1;
-      // await video.save();
-      // getIO(req).to(`video_${videoId}`).emit("view_updated", { views: video.views });
+      // Anonymous view – always count
+      shouldIncrement = true;
+    }
+
+    if (shouldIncrement) {
+      video.views += 1;
+      await video.save();
+      getIO(req).to(`video_${videoId}`).emit("view_updated", { views: video.views });
     }
 
     res.json(await video.populate("user", "name email subscribers"));
@@ -99,33 +106,32 @@ export const updateReaction = async (req: Request, res: Response) => {
 
     if (existingReaction) {
       if (existingReaction.type === type) {
-        // Toggle off
+        // Toggle off – remove the reaction
         await existingReaction.deleteOne();
-        if (type === "like") video.likes = Math.max(0, video.likes - 1);
-        else video.dislikes = Math.max(0, video.dislikes - 1); // Assuming dislikes field exists
       } else {
         // Switch reaction
-        if (existingReaction.type === "like") {
-          video.likes = Math.max(0, video.likes - 1);
-          video.dislikes = (video.dislikes || 0) + 1;
-        } else {
-          video.dislikes = Math.max(0, (video.dislikes || 0) - 1);
-          video.likes += 1;
-        }
         existingReaction.type = type;
         await existingReaction.save();
       }
     } else {
       // New reaction
       await Reaction.create({ user: userId, video: videoId, type });
-      if (type === "like") video.likes += 1;
-      else video.dislikes = (video.dislikes || 0) + 1;
     }
 
+    // Re-count from the Reaction collection to keep counts accurate
+    const likesCount = await Reaction.countDocuments({ video: videoId, type: "like" });
+    const dislikesCount = await Reaction.countDocuments({ video: videoId, type: "dislike" });
+    video.likes = likesCount;
+    video.dislikes = dislikesCount;
     await video.save();
+
+    // Also return the current user's reaction so the frontend can stay in sync
+    const currentReaction = await Reaction.findOne({ user: userId, video: videoId });
+
     getIO(req).to(`video_${videoId}`).emit("reaction_updated", { likes: video.likes, dislikes: video.dislikes });
 
-    res.json(await video.populate("user", "name email subscribers"));
+    const populated = await video.populate("user", "name email subscribers");
+    res.json({ ...populated.toJSON(), userReaction: currentReaction ? currentReaction.type : null });
   } catch (error) {
     console.error("Update reaction error:", error);
     res.status(500).json({ message: "Server error" });
@@ -242,6 +248,20 @@ export const getSubscriptionStatus = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get subscription status error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/** Get the current user's reaction (like/dislike/null) for a specific video. */
+export const getUserReaction = async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const videoId = req.params.id;
+
+  try {
+    const reaction = await Reaction.findOne({ user: userId, video: videoId });
+    res.json({ reaction: reaction ? reaction.type : null });
+  } catch (error) {
+    console.error("Get user reaction error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

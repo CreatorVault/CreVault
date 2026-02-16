@@ -23,6 +23,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
   const [viewCounted, setViewCounted] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
 
+  // Keep latest callbacks in refs to avoid stale closures and unnecessary effect re-runs
+  const onViewStartRef = useRef(onViewStart);
+  onViewStartRef.current = onViewStart;
+  const onEndedRef = useRef(onEnded);
+  onEndedRef.current = onEnded;
+
+  // Reset viewCounted when src changes (new video)
+  useEffect(() => {
+    setViewCounted(false);
+  }, [src]);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -33,7 +44,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
       // Count view after 3 seconds of watching
       if (!viewCounted && video.currentTime >= 3) {
         setViewCounted(true);
-        onViewStart?.();
+        onViewStartRef.current?.();
       }
     };
 
@@ -45,7 +56,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
     const handlePause = () => setIsPlaying(false);
     const handleEnded = () => {
       setIsPlaying(false);
-      onEnded?.();
+      onEndedRef.current?.();
     };
 
     video.addEventListener('timeupdate', handleTimeUpdate);
@@ -61,7 +72,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
       video.removeEventListener('pause', handlePause);
       video.removeEventListener('ended', handleEnded);
     };
-  }, [onViewStart, viewCounted, onEnded]);
+  }, [viewCounted, src]);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -127,7 +138,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
   return (
     <div
       ref={containerRef}
-      className="group relative aspect-video w-full overflow-hidden rounded-xl bg-black"
+      className="group relative aspect-video w-full overflow-hidden bg-black sm:rounded-xl"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >

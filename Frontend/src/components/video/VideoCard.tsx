@@ -22,7 +22,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter') goToVideo(); }}
       >
-        <div className="video-thumbnail w-64 shrink-0">
+        <div className="video-thumbnail w-40 shrink-0 sm:w-64">
           <img
             src={video.thumbnail}
             alt={video.title}
@@ -32,7 +32,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
         </div>
 
         <div className="flex flex-col gap-2 py-1">
-          <h3 className="line-clamp-2 text-lg font-medium text-foreground group-hover:text-primary transition-colors">
+          <h3 className="line-clamp-2 text-sm font-medium text-foreground group-hover:text-primary transition-colors sm:text-lg">
             {video.title}
           </h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

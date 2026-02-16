@@ -8,6 +8,7 @@ import {
     Upload,
     BarChart3,
     TrendingUp,
+    IndianRupee,
 } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -124,7 +125,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Total Videos */}
                     <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-blue-500/10 transition-transform group-hover:scale-110" />
@@ -163,6 +164,20 @@ const Dashboard = () => {
                             <p className="text-sm font-medium text-muted-foreground">Total Likes</p>
                             <p className="mt-1 text-3xl font-bold text-foreground">
                                 {formatViews(stats?.totalLikes ?? 0)}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Estimated Earnings */}
+                    <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
+                        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-yellow-500/10 transition-transform group-hover:scale-110" />
+                        <div className="relative">
+                            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-500/10">
+                                <IndianRupee className="h-6 w-6 text-yellow-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground">Estimated Earnings</p>
+                            <p className="mt-1 text-3xl font-bold text-foreground">
+                                ₹{((stats?.totalViews ?? 0) * 0.40).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                         </div>
                     </div>
