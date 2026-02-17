@@ -14,7 +14,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     useEffect(() => {
         // Should match your backend URL
-        const socketInstance = io('http://localhost:5000', {
+        // Use environment variable for backend URL, fallback to localhost for dev
+        const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const socketInstance = io(socketUrl, {
             // autoConnect: true,
             // transports: ["websocket"] 
         });

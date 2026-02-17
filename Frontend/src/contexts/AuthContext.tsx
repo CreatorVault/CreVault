@@ -17,7 +17,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
-      const apiBase = 'http://localhost:5000';
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = useCallback(async (username: string, email: string, password: string): Promise<boolean> => {
     try {
-      const apiBase = 'http://localhost:5000';
+      const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/auth/register`, {
         method: 'POST',
         headers: {
