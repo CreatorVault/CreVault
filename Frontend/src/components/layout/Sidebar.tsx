@@ -44,42 +44,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { icon: Newspaper, label: 'News', path: '/?category=News' },
   ];
 
-  const renderNavItem = (icon: React.ElementType, label: string, path: string) => {
-    const Icon = icon;
-    const isActive = location.pathname === path ||
-      (path.includes('?') && location.search.includes(path.split('?')[1]));
-
-    return (
-      <Link
-        key={path}
-        to={path}
-        onClick={() => {
-          // Close sidebar on mobile when a link is clicked
-          if (window.innerWidth < 768 && onClose) {
-            onClose();
-          }
-        }}
-        className={cn(
-          'sidebar-item',
-          isActive && 'active',
-          // Desktop collapsed state styling
-          !isOpen && 'md:flex-col md:gap-1 md:px-0 md:py-4 md:text-[10px]'
-        )}
-      >
-        <Icon className={cn('h-5 w-5 shrink-0', !isOpen && 'md:h-6 md:w-6')} />
-        <span className={cn(
-          // Always show text on mobile (because sidebar is either hidden or full width)
-          // Hide text on desktop only when collapsed
-          !isOpen && 'md:text-center md:hidden lg:block',
-          !isOpen && 'md:hidden'
-        )}>{label}</span>
-        {/* Helper for desktop collapsed text */}
-        {!isOpen && <span className="hidden md:block text-[10px] text-center">{label}</span>}
-      </Link>
-    );
-  };
-
-  // Simplified render item to avoid complex span hiding logic
   const renderItem = (icon: React.ElementType, label: string, path: string) => {
     const Icon = icon;
     const isActive = location.pathname === path ||
@@ -93,24 +57,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           if (window.innerWidth < 768 && onClose) onClose();
         }}
         className={cn(
-          'sidebar-item',
+          'sidebar-item group',
           isActive && 'active',
-          // Desktop collapsed styling
           !isOpen && 'md:flex-col md:justify-center md:gap-1 md:px-0 md:py-3'
         )}
       >
-        <Icon className={cn('h-5 w-5 shrink-0', !isOpen && 'md:h-6 md:w-6 md:mr-0')} />
-        <span className={cn(
-          'whitespace-nowrap transition-all duration-300',
-          // Mobile: Always visible if sidebar is open (sidebar is hidden otherwise)
-          // Desktop: Visible if open, special styling if closed
-          isOpen ? 'opacity-100' : 'md:hidden'
-        )}>
+        <Icon
+          className={cn(
+            'h-5 w-5 shrink-0 transition-all duration-200',
+            isActive
+              ? 'text-primary drop-shadow-[0_0_6px_hsl(180_100%_50%/0.8)]'
+              : 'text-sidebar-foreground group-hover:text-accent-foreground',
+            !isOpen && 'md:h-5 md:w-5 md:mr-0'
+          )}
+        />
+        <span
+          className={cn(
+            'whitespace-nowrap transition-all duration-300 font-medium',
+            isOpen ? 'opacity-100' : 'md:hidden'
+          )}
+        >
           {label}
         </span>
-        {/* Desktop Collapsed label (small text) */}
         {!isOpen && (
-          <span className="hidden text-[10px] md:block text-center w-full truncate px-1">
+          <span className="hidden text-[10px] md:block text-center w-full truncate px-1 text-sidebar-foreground">
             {label}
           </span>
         )}
@@ -123,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Mobile Backdrop */}
       <div
         className={cn(
-          "fixed inset-0 z-30 bg-black/50 backdrop-blur-sm transition-opacity md:hidden",
+          "fixed inset-0 z-30 bg-black/60 backdrop-blur-sm transition-opacity md:hidden",
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}
         onClick={onClose}
@@ -131,60 +101,111 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
       <aside
         className={cn(
-          'fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] overflow-y-auto border-r border-sidebar-border bg-sidebar transition-all duration-300',
-          // Mobile: Width fixed to 64, slide in/out
+          'fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden transition-all duration-300',
           'w-64',
           isOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop: Width changes, always visible (translate-0)
           isOpen ? 'md:w-60' : 'md:w-[72px]',
           'md:translate-x-0'
         )}
+        style={{
+          background: 'hsl(240 16% 8%)',
+          borderRight: '1px solid hsl(240 12% 15%)',
+        }}
       >
+        {/* Subtle top glow accent */}
+        <div
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{
+            background: 'linear-gradient(90deg, transparent, hsl(270 80% 55% / 0.4), hsl(180 100% 50% / 0.4), transparent)',
+          }}
+        />
+
         <div className="flex h-full flex-col justify-between">
-          <nav className="flex flex-col gap-1 p-2">
-            {/* Mobile Close Button (Optional, but good for UX) */}
-            <div className="flex items-center justify-end md:hidden p-2">
-              <Button variant="ghost" size="icon" onClick={onClose}>
+          <nav className="flex flex-col gap-1 p-2 pt-3">
+            {/* Mobile Close */}
+            <div className="flex items-center justify-end md:hidden p-1 mb-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-muted-foreground hover:text-primary hover:bg-accent"
+              >
                 <X className="h-5 w-5" />
               </Button>
             </div>
 
             {/* Main Links */}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {mainLinks.map(link => renderItem(link.icon, link.label, link.path))}
             </div>
 
-            <div className="my-3 border-t border-sidebar-border" />
+            <div
+              className="my-3 h-px mx-2"
+              style={{ background: 'linear-gradient(90deg, transparent, hsl(240 12% 22%), transparent)' }}
+            />
 
             {/* Library */}
             {isAuthenticated && (
               <>
                 {(isOpen || window.innerWidth < 768) && (
-                  <h3 className={cn("mb-2 px-3 text-sm font-semibold text-sidebar-foreground", !isOpen && "md:hidden")}>Library</h3>
+                  <h3
+                    className={cn(
+                      "mb-1 px-3 text-[11px] font-semibold uppercase tracking-widest",
+                      !isOpen && "md:hidden"
+                    )}
+                    style={{ color: 'hsl(270 60% 65%)' }}
+                  >
+                    Library
+                  </h3>
                 )}
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {libraryLinks.map(link => renderItem(link.icon, link.label, link.path))}
                 </div>
-                <div className="my-3 border-t border-sidebar-border" />
+                <div
+                  className="my-3 h-px mx-2"
+                  style={{ background: 'linear-gradient(90deg, transparent, hsl(240 12% 22%), transparent)' }}
+                />
               </>
             )}
 
-            {/* Categories */}
+            {/* Explore Categories */}
             {(isOpen || window.innerWidth < 768) && (
-              <h3 className={cn("mb-2 px-3 text-sm font-semibold text-sidebar-foreground", !isOpen && "md:hidden")}>Explore</h3>
+              <h3
+                className={cn(
+                  "mb-1 px-3 text-[11px] font-semibold uppercase tracking-widest",
+                  !isOpen && "md:hidden"
+                )}
+                style={{ color: 'hsl(180 80% 55%)' }}
+              >
+                Explore
+              </h3>
             )}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               {categoryLinks.map(link => renderItem(link.icon, link.label, link.path))}
             </div>
 
-            {/* Admin Link */}
+            {/* Admin */}
             {isAdmin && (
               <>
-                <div className="my-3 border-t border-sidebar-border" />
+                <div
+                  className="my-3 h-px mx-2"
+                  style={{ background: 'linear-gradient(90deg, transparent, hsl(240 12% 22%), transparent)' }}
+                />
                 {renderItem(Settings, 'Admin Panel', '/admin')}
               </>
             )}
           </nav>
+
+          {/* Bottom decoration */}
+          {isOpen && (
+            <div className="p-4 m-2 mb-4 rounded-xl" style={{
+              background: 'linear-gradient(135deg, hsl(270 40% 14%) 0%, hsl(240 20% 12%) 100%)',
+              border: '1px solid hsl(270 40% 20%)',
+            }}>
+              <p className="text-xs font-semibold" style={{ color: 'hsl(270 80% 72%)' }}>CreVault</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'hsl(240 10% 50%)' }}>Your creative universe</p>
+            </div>
+          )}
         </div>
       </aside>
     </>

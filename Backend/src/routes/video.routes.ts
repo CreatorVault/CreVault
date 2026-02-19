@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
     uploadVideo,
+    getUploadSignature, // New export
     getAllVideos,
     getVideoById,
     incrementViews,
@@ -17,7 +18,9 @@ import { handleVideoUpload } from "../middleware/upload.middleware";
 const router = Router();
 
 router.get("/dashboard", protect, getDashboardStats); // Dashboard route
-router.post("/upload", protect, handleVideoUpload, uploadVideo);
+router.get("/signature", protect, getUploadSignature); // Get upload signature
+router.post("/upload", protect, handleVideoUpload, uploadVideo); // Legacy upload (might fail on Vercel for large files)
+router.post("/create", protect, uploadVideo); // Create video from metadata (direct upload)
 router.get("/", getAllVideos);
 router.get("/:id", getVideoById);
 router.post("/:id/view", optionalProtect, incrementViews); // Works for both anonymous and authenticated users

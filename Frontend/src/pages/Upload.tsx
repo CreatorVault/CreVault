@@ -98,39 +98,40 @@ const Upload = () => {
     setUploadProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append('title', title);
-      formData.append('description', description);
-      formData.append('category', category);
-      formData.append('video', videoFile);
-      if (thumbnailFile) {
-        formData.append('thumbnail', thumbnailFile);
-      }
-
-      if (user) {
-        formData.append('authorId', user.id);
-        formData.append('authorName', user.username);
-        formData.append('authorAvatar', user.avatar);
-      }
-
+      // 1. Get signatures for direct upload
       const apiBase = getApiBase();
-      const url = apiBase ? `${apiBase}/api/videos/upload` : '/api/videos/upload';
-
-      // Get token from localStorage
       const storedUser = localStorage.getItem('streamtube_user');
       const token = storedUser ? JSON.parse(storedUser).token : null;
+      const authHeaders = token ? { Authorization: `Bearer ${token}` } : {};
 
-      // Do NOT set Content-Type manually — axios must auto-set it
-      // with the correct multipart boundary when sending FormData
-      const headers: Record<string, string> = {};
+      // Get video signature
+      const videoSigRes = await axios.get(`${apiBase}/api/videos/signature?folder=videos`, {
+        headers: authHeaders
+      });
+      const { signature: vSig, timestamp: vTs, cloudName, apiKey: vKey } = videoSigRes.data;
 
-      // Add authorization header if token exists
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      // Get thumbnail signature
+      let tSig, tTs, tKey;
+      if (thumbnailFile) {
+        const thumbSigRes = await axios.get(`${apiBase}/api/videos/signature?folder=thumbnails`, {
+          headers: authHeaders
+        });
+        tSig = thumbSigRes.data.signature;
+        tTs = thumbSigRes.data.timestamp;
+        tKey = thumbSigRes.data.apiKey;
       }
 
-      await axios.post(url, formData, {
-        headers,
+      // 2. Upload Video to Cloudinary
+      const videoFormData = new FormData();
+      videoFormData.append('file', videoFile);
+      videoFormData.append('api_key', vKey);
+      videoFormData.append('timestamp', vTs.toString());
+      videoFormData.append('signature', vSig);
+      videoFormData.append('folder', 'videos');
+
+      const cloudinaryVideoUrl = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+
+      const videoUploadRes = await axios.post(cloudinaryVideoUrl, videoFormData, {
         onUploadProgress: (progressEvent) => {
           if (!progressEvent.total) return;
           const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -138,9 +139,39 @@ const Upload = () => {
         },
       });
 
+      const videoUrl = videoUploadRes.data.secure_url;
+
+      // 3. Upload Thumbnail to Cloudinary (if exists)
+      let thumbnailUrl = '';
+      if (thumbnailFile && tSig) {
+        const thumbFormData = new FormData();
+        thumbFormData.append('file', thumbnailFile);
+        thumbFormData.append('api_key', tKey); // usually same key
+        thumbFormData.append('timestamp', tTs.toString());
+        thumbFormData.append('signature', tSig);
+        thumbFormData.append('folder', 'thumbnails');
+
+        const cloudinaryThumbUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+        const thumbUploadRes = await axios.post(cloudinaryThumbUrl, thumbFormData);
+        thumbnailUrl = thumbUploadRes.data.secure_url;
+      }
+
+      // 4. Create Video Entry in Backend
+      await axios.post(
+        `${apiBase}/api/videos/create`,
+        {
+          title,
+          description,
+          category,
+          videoUrl,
+          thumbnailUrl: thumbnailUrl || undefined,
+        },
+        { headers: authHeaders }
+      );
+
       toast({
         title: 'Video uploaded!',
-        description: 'Your video has been uploaded successfully.',
+        description: 'Your video has been published successfully.',
       });
 
       setTimeout(() => {

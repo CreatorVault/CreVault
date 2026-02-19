@@ -2,11 +2,11 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import VideoCard from '@/components/video/VideoCard';
-import { Button } from '@/components/ui/button';
 import { categories } from '@/lib/mockData';
 import type { Video } from '@/lib/mockData';
 import { getVideos } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { Search } from 'lucide-react';
 
 const Home = () => {
   const [searchParams] = useSearchParams();
@@ -39,7 +39,6 @@ const Home = () => {
   const filteredVideos = useMemo(() => {
     let list = videos;
 
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       list = list.filter(
@@ -50,7 +49,6 @@ const Home = () => {
       );
     }
 
-    // Filter by category
     if (selectedCategory !== 'All') {
       list = list.filter((video) => video.category === selectedCategory);
     }
@@ -61,67 +59,98 @@ const Home = () => {
   return (
     <MainLayout>
       <div className="p-4 sm:p-6">
-        {/* Category filters */}
+
+        {/* Category filter pills */}
         <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map(category => (
-            <Button
+            <button
               key={category}
-              variant="secondary"
-              size="sm"
               onClick={() => setSelectedCategory(category)}
               className={cn(
-                'shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-all',
+                'category-pill shrink-0 whitespace-nowrap',
                 selectedCategory === category
-                  ? 'bg-foreground text-background hover:bg-foreground/90'
-                  : 'bg-secondary text-secondary-foreground hover:bg-accent'
+                  ? 'category-pill-active'
+                  : 'category-pill-inactive'
               )}
             >
               {category}
-            </Button>
+            </button>
           ))}
         </div>
 
         {/* Search results header */}
         {searchQuery && (
-          <div className="mb-6">
-            <h1 className="text-xl font-semibold text-foreground">
-              Search results for "{searchQuery}"
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {filteredVideos.length} video{filteredVideos.length !== 1 ? 's' : ''} found
-            </p>
+          <div className="mb-6 flex items-center gap-3">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-xl"
+              style={{ background: 'hsl(180 100% 50% / 0.12)', border: '1px solid hsl(180 100% 50% / 0.25)' }}
+            >
+              <Search className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">
+                Results for <span className="gradient-text">"{searchQuery}"</span>
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {filteredVideos.length} video{filteredVideos.length !== 1 ? 's' : ''} found
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Loading / Error */}
+        {/* Loading */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            <p className="mt-4 text-muted-foreground">Loading videos...</p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div
+              className="h-12 w-12 animate-spin rounded-full spinner-cyan"
+              style={{
+                border: '3px solid hsl(180 100% 50% / 0.15)',
+                borderTopColor: 'hsl(180 100% 50%)',
+                boxShadow: '0 0 20px hsl(180 100% 50% / 0.2)',
+              }}
+            />
+            <p className="mt-5 text-sm text-muted-foreground font-medium">Loading videos...</p>
           </div>
         )}
+
+        {/* Error */}
         {error && !loading && (
-          <div className="flex flex-col items-center justify-center py-20">
-            <p className="text-destructive">{error}</p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div
+              className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl text-3xl"
+              style={{ background: 'hsl(350 80% 55% / 0.12)', border: '1px solid hsl(350 80% 55% / 0.25)' }}
+            >
+              ⚡
+            </div>
+            <p className="font-semibold text-destructive">{error}</p>
             <p className="mt-2 text-sm text-muted-foreground">Make sure the backend is running on port 5000.</p>
           </div>
         )}
 
         {/* Video grid */}
         {!loading && !error && filteredVideos.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredVideos.map(video => (
               <VideoCard key={video.id} video={video} />
             ))}
           </div>
         ) : !loading && !error ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="mb-4 text-6xl">🎬</div>
-            <h2 className="text-xl font-semibold text-foreground">No videos found</h2>
-            <p className="mt-2 text-muted-foreground">
+          <div className="flex flex-col items-center justify-center py-24">
+            <div
+              className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl text-4xl"
+              style={{
+                background: 'linear-gradient(135deg, hsl(270 40% 14%) 0%, hsl(240 20% 12%) 100%)',
+                border: '1px solid hsl(270 40% 20%)',
+                boxShadow: '0 0 30px hsl(270 80% 55% / 0.1)',
+              }}
+            >
+              🎬
+            </div>
+            <h2 className="text-xl font-bold text-foreground">No videos found</h2>
+            <p className="mt-2 text-sm text-muted-foreground text-center max-w-xs">
               {searchQuery
                 ? 'Try different search terms or explore other categories'
-                : 'No videos in this category yet'}
+                : 'No videos in this category yet — be the first to upload!'}
             </p>
           </div>
         ) : null}

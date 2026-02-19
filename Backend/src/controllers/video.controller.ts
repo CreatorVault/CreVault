@@ -6,16 +6,53 @@ import Reaction from "../models/Reaction.model";
 import Subscription from "../models/Subscription.model";
 import User from "../models/User.model";
 
-const getIO = (req: Request) => req.app.get("io");
+import cloudinary from "../config/cloudinary";
+
+const getIO = (req: Request) => {
+  const io = req.app.get("io");
+  if (!io) {
+    return {
+      to: () => ({ emit: () => { } }),
+      emit: () => { },
+    };
+  }
+  return io;
+};
+
+export const getUploadSignature = async (req: Request, res: Response) => {
+  try {
+    const folder = (req.query.folder as string) || 'videos';
+    const timestamp = Math.round((new Date()).getTime() / 1000);
+    const signature = cloudinary.utils.api_sign_request({
+      timestamp: timestamp,
+      folder: folder,
+    }, process.env.CLOUDINARY_API_SECRET as string);
+
+    res.json({
+      signature,
+      timestamp,
+      folder,
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      apiKey: process.env.CLOUDINARY_API_KEY
+    });
+  } catch (error) {
+    console.error("Signature error:", error);
+    res.status(500).json({ message: "Failed to generate signature" });
+  }
+};
 
 export const uploadVideo = async (req: Request, res: Response) => {
   try {
-    const { title, description } = req.body;
-    const videoUrl = (req as any).videoUrl;
+    const { title, description, videoUrl: bodyVideoUrl, thumbnailUrl: bodyThumbnailUrl } = req.body;
+
+    // Check for video URL from middleware (if used) or body (direct upload)
+    const videoUrl = (req as any).videoUrl || bodyVideoUrl;
+
     if (!videoUrl) {
-      return res.status(400).json({ message: "No video uploaded" });
+      return res.status(400).json({ message: "No video uploaded or URL provided" });
     }
-    const thumbnailUrl = (req as any).thumbnailUrl || undefined;
+
+    const thumbnailUrl = (req as any).thumbnailUrl || bodyThumbnailUrl || undefined;
 
     const video = await Video.create({
       title,

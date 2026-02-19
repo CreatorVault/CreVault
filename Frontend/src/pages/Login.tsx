@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Play } from 'lucide-react';
+import { Eye, EyeOff, Zap, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -47,30 +47,65 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md animate-fade-in">
+    <div
+      className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden"
+      style={{ background: 'hsl(240 15% 6%)' }}
+    >
+      {/* Background orbs */}
+      <div
+        className="absolute -top-40 -left-40 h-96 w-96 rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, hsl(270 80% 55% / 0.15) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }}
+      />
+      <div
+        className="absolute -bottom-40 -right-40 h-96 w-96 rounded-full pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle, hsl(180 100% 50% / 0.1) 0%, transparent 70%)',
+          filter: 'blur(60px)',
+        }}
+      />
+
+      <div className="w-full max-w-md animate-fade-in relative z-10">
         {/* Logo */}
-        <Link to="/" className="mb-8 flex items-center justify-center gap-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <Play className="h-6 w-6 fill-primary-foreground text-primary-foreground" />
+        <Link to="/" className="mb-8 flex items-center justify-center gap-3 group">
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110"
+            style={{
+              background: 'linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(200 100% 45%) 100%)',
+              boxShadow: '0 0 24px hsl(180 100% 50% / 0.4)',
+            }}
+          >
+            <Zap className="h-6 w-6 fill-current text-[hsl(240_15%_6%)]" />
           </div>
-          <span className="text-3xl font-bold text-foreground">
-            Stream<span className="text-primary">Tube</span>
+          <span className="text-3xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+            <span className="text-foreground">Cre</span>
+            <span className="gradient-text">Vault</span>
           </span>
         </Link>
 
-        {/* Form card */}
-        <div className="rounded-2xl border border-border bg-card p-8 shadow-lg">
-          <div className="mb-6 text-center">
+        {/* Card */}
+        <div
+          className="rounded-2xl p-8"
+          style={{
+            background: 'hsl(240 14% 10%)',
+            border: '1px solid hsl(240 12% 18%)',
+            boxShadow: '0 24px 60px hsl(240 15% 4% / 0.8), 0 0 0 1px hsl(270 60% 30% / 0.1)',
+          }}
+        >
+          {/* Card header */}
+          <div className="mb-7 text-center">
             <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Sign in to your account to continue
+              Sign in to continue to your vault
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-foreground">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'hsl(220 15% 65%)' }}>
                 Email
               </Label>
               <Input
@@ -80,12 +115,18 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-border bg-secondary text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                className="h-11 rounded-xl border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-1"
+                style={{
+                  background: 'hsl(240 12% 14%)',
+                  boxShadow: 'inset 0 0 0 1px hsl(240 12% 20%)',
+                  outline: 'none',
+                }}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-foreground">
+            {/* Password */}
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'hsl(220 15% 65%)' }}>
                 Password
               </Label>
               <div className="relative">
@@ -97,54 +138,95 @@ const Login = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="border-border bg-secondary pr-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                  className="h-11 rounded-xl border-0 pr-11 text-foreground placeholder:text-muted-foreground focus-visible:ring-1"
+                  style={{
+                    background: 'hsl(240 12% 14%)',
+                    boxShadow: 'inset 0 0 0 1px hsl(240 12% 20%)',
+                  }}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
+                  className="absolute right-0 top-0 h-11 px-3 text-muted-foreground hover:text-primary hover:bg-transparent"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
 
+            {/* Forgot password */}
             <div className="flex items-center justify-end">
-              <Button variant="link" className="h-auto p-0 text-sm text-primary">
+              <Button variant="link" className="h-auto p-0 text-xs font-medium" style={{ color: 'hsl(180 100% 55%)' }}>
                 Forgot password?
               </Button>
             </div>
 
-            <Button
+            {/* Submit */}
+            <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+              className="relative w-full h-11 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{
+                background: isLoading
+                  ? 'hsl(180 60% 35%)'
+                  : 'linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(200 100% 45%) 100%)',
+                color: 'hsl(240 15% 6%)',
+                boxShadow: isLoading ? 'none' : '0 0 20px hsl(180 100% 50% / 0.3)',
+              }}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
+              {isLoading ? (
+                <>
+                  <div
+                    className="h-4 w-4 animate-spin rounded-full"
+                    style={{ border: '2px solid hsl(240 15% 20%)', borderTopColor: 'hsl(240 15% 6%)' }}
+                  />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
           </form>
 
+          {/* Sign up link */}
           <div className="mt-6 text-center text-sm text-muted-foreground">
             Don't have an account?{' '}
-            <Link to="/signup" className="font-medium text-primary hover:underline">
-              Sign up
+            <Link
+              to="/signup"
+              className="font-semibold hover:underline transition-colors"
+              style={{ color: 'hsl(180 100% 55%)' }}
+            >
+              Create one free
             </Link>
           </div>
 
           {/* Demo credentials */}
-          <div className="mt-6 rounded-lg bg-secondary p-4">
-            <p className="text-xs font-medium text-muted-foreground">Demo Credentials:</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              User: <span className="text-foreground">techmaster@example.com</span>
+          <div
+            className="mt-6 rounded-xl p-4"
+            style={{
+              background: 'hsl(240 12% 13%)',
+              border: '1px solid hsl(240 12% 20%)',
+            }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'hsl(270 60% 65%)' }}>
+              Demo Credentials
             </p>
-            <p className="text-xs text-muted-foreground">
-              Admin: <span className="text-foreground">admin@streamtube.com</span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Password: <span className="text-foreground">any 6+ characters</span>
-            </p>
+            <div className="space-y-1">
+              <p className="text-xs text-muted-foreground">
+                User: <span className="font-medium text-foreground">techmaster@example.com</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Admin: <span className="font-medium text-foreground">crevault@gmail.com</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Password: <span className="font-medium text-foreground">any 6+ characters</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
