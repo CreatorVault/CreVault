@@ -72,7 +72,37 @@ export const uploadVideo = async (req: Request, res: Response) => {
 export const getAllVideos = async (_req: Request, res: Response) => {
   try {
     const videos = await Video.find().sort({ createdAt: -1 }).populate("user", "name email subscribers");
-    res.json(videos);
+
+    // Recount likes/dislikes from Reaction collection for all videos
+    const videoIds = videos.map((v) => v._id);
+    const reactions = await Reaction.aggregate([
+      { $match: { video: { $in: videoIds } } },
+      { $group: { _id: { video: "$video", type: "$type" }, count: { $sum: 1 } } },
+    ]);
+
+    // Build a map: videoId -> { like: N, dislike: N }
+    const countMap: Record<string, { like: number; dislike: number }> = {};
+    for (const r of reactions) {
+      const key = r._id.video.toString();
+      if (!countMap[key]) countMap[key] = { like: 0, dislike: 0 };
+      countMap[key][r._id.type as 'like' | 'dislike'] = r.count;
+    }
+
+    // Sync and return updated videos
+    const updatedVideos = await Promise.all(
+      videos.map(async (video) => {
+        const key = video._id.toString();
+        const counts = countMap[key] || { like: 0, dislike: 0 };
+        if (video.likes !== counts.like || video.dislikes !== counts.dislike) {
+          video.likes = counts.like;
+          video.dislikes = counts.dislike;
+          await video.save();
+        }
+        return video;
+      })
+    );
+
+    res.json(updatedVideos);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -83,7 +113,15 @@ export const getVideoById = async (req: Request, res: Response) => {
     const video = await Video.findById(req.params.id).populate("user", "name email subscribers");
     if (!video) return res.status(404).json({ message: "Video not found" });
 
-    // Add subscriber count to the response explicitly if needed, though populated user has it
+    // Always recount likes/dislikes from Reaction collection for accuracy
+    const likesCount = await Reaction.countDocuments({ video: video._id, type: "like" });
+    const dislikesCount = await Reaction.countDocuments({ video: video._id, type: "dislike" });
+    if (video.likes !== likesCount || video.dislikes !== dislikesCount) {
+      video.likes = likesCount;
+      video.dislikes = dislikesCount;
+      await video.save();
+    }
+
     res.json(video);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -249,6 +287,28 @@ export const getDashboardStats = async (req: Request, res: Response) => {
   try {
     const videos = await Video.find({ user: userId }).sort({ createdAt: -1 });
 
+    // Recount likes/dislikes from Reaction collection for accuracy
+    const videoIds = videos.map((v) => v._id);
+    const reactions = await Reaction.aggregate([
+      { $match: { video: { $in: videoIds } } },
+      { $group: { _id: { video: "$video", type: "$type" }, count: { $sum: 1 } } },
+    ]);
+    const countMap: Record<string, { like: number; dislike: number }> = {};
+    for (const r of reactions) {
+      const key = r._id.video.toString();
+      if (!countMap[key]) countMap[key] = { like: 0, dislike: 0 };
+      countMap[key][r._id.type as 'like' | 'dislike'] = r.count;
+    }
+    for (const video of videos) {
+      const key = video._id.toString();
+      const counts = countMap[key] || { like: 0, dislike: 0 };
+      if (video.likes !== counts.like || video.dislikes !== counts.dislike) {
+        video.likes = counts.like;
+        video.dislikes = counts.dislike;
+        await video.save();
+      }
+    }
+
     const totalVideos = videos.length;
     const totalViews = videos.reduce((acc, curr) => acc + (curr.views || 0), 0);
     const totalLikes = videos.reduce((acc, curr) => acc + (curr.likes || 0), 0);
@@ -274,13 +334,22 @@ export const getSubscriptionStatus = async (req: Request, res: Response) => {
     if (!video) return res.status(404).json({ message: "Video not found" });
 
     const channelId = video.user;
-    const channelUser = await User.findById(channelId);
-    if (!channelUser) return res.status(404).json({ message: "Channel not found" });
 
-    const existingSub = await Subscription.findOne({ subscriber: userId, channel: channelId });
+    // Always recount from Subscription collection for accuracy
+    const [existingSub, patronCount] = await Promise.all([
+      Subscription.findOne({ subscriber: userId, channel: channelId }),
+      Subscription.countDocuments({ channel: channelId }),
+    ]);
+
+    // Sync the User.subscribers field so it stays consistent
+    const channelUser = await User.findById(channelId);
+    if (channelUser && channelUser.subscribers !== patronCount) {
+      channelUser.subscribers = patronCount;
+      await channelUser.save();
+    }
 
     res.json({
-      subscribers: channelUser.subscribers || 0,
+      subscribers: patronCount,
       isSubscribed: !!existingSub,
     });
   } catch (error) {
@@ -299,6 +368,36 @@ export const getUserReaction = async (req: Request, res: Response) => {
     res.json({ reaction: reaction ? reaction.type : null });
   } catch (error) {
     console.error("Get user reaction error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+/** Get all videos liked by the current user (sorted newest-liked-first). */
+export const getLikedVideos = async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+
+  try {
+    // Find all like reactions by this user, sorted newest first
+    const likedReactions = await Reaction.find({ user: userId, type: "like" }).sort({ createdAt: -1 });
+
+    if (likedReactions.length === 0) {
+      return res.json([]);
+    }
+
+    const videoIds = likedReactions.map((r) => r.video);
+
+    // Fetch the actual videos and preserve order
+    const videos = await Video.find({ _id: { $in: videoIds } }).populate("user", "name email subscribers");
+
+    // Sort videos to match the order of likedReactions (newest liked first)
+    const videoMap = new Map(videos.map((v) => [v._id.toString(), v]));
+    const orderedVideos = videoIds
+      .map((id) => videoMap.get(id.toString()))
+      .filter(Boolean);
+
+    res.json(orderedVideos);
+  } catch (error) {
+    console.error("Get liked videos error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

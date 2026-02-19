@@ -13,7 +13,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const stored = localStorage.getItem('streamtube_user');
+      if (stored) return JSON.parse(stored) as User;
+    } catch { }
+    return null;
+  });
 
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
@@ -90,17 +96,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('streamtube_user');
   }, []);
 
-  // Check for stored user on mount
-  React.useEffect(() => {
-    const storedUser = localStorage.getItem('streamtube_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        localStorage.removeItem('streamtube_user');
-      }
-    }
-  }, []);
 
   return (
     <AuthContext.Provider

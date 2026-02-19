@@ -13,6 +13,10 @@ import Upload from "./pages/Upload";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
+import Explore from "./pages/Explore";
+import WatchLater from "./pages/WatchLater";
+import LikedVideos from "./pages/LikedVideos";
+import YourVideos from "./pages/YourVideos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +43,10 @@ const App = () => (
               <Route path="/profile/:userId" element={<Profile />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/playlist/watch-later" element={<WatchLater />} />
+              <Route path="/playlist/liked" element={<LikedVideos />} />
+              <Route path="/your-videos" element={<YourVideos />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

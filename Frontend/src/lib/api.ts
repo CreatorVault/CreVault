@@ -303,3 +303,20 @@ export async function getUserVideos(userId: string): Promise<Video[]> {
   const apiBase = base || (typeof window !== 'undefined' ? window.location.origin : '');
   return data.map((v) => mapApiVideoToVideo(v, apiBase));
 }
+
+/** Fetch all videos the current user has liked (requires auth). */
+export async function getLikedVideos(): Promise<Video[]> {
+  const base = getApiBase();
+  const url = base ? `${base}/api/videos/liked` : `/api/videos/liked`;
+  const token = getAuthToken();
+  if (!token) return [];
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch liked videos: ${res.status}`);
+  }
+  const data: ApiVideo[] = await res.json();
+  const apiBase = base || (typeof window !== 'undefined' ? window.location.origin : '');
+  return data.map((v) => mapApiVideoToVideo(v, apiBase));
+}

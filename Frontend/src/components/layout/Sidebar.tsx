@@ -7,9 +7,6 @@ import {
   ThumbsUp,
   ListVideo,
   Flame,
-  Music2,
-  Gamepad2,
-  Newspaper,
   Settings,
   X
 } from 'lucide-react';
@@ -39,9 +36,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const categoryLinks = [
     { icon: Flame, label: 'Trending', path: '/?category=Trending' },
-    { icon: Music2, label: 'Music', path: '/?category=Music' },
-    { icon: Gamepad2, label: 'Gaming', path: '/?category=Gaming' },
-    { icon: Newspaper, label: 'News', path: '/?category=News' },
   ];
 
   const renderItem = (icon: React.ElementType, label: string, path: string) => {
@@ -168,18 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </>
             )}
 
-            {/* Explore Categories */}
-            {(isOpen || window.innerWidth < 768) && (
-              <h3
-                className={cn(
-                  "mb-1 px-3 text-[11px] font-semibold uppercase tracking-widest",
-                  !isOpen && "md:hidden"
-                )}
-                style={{ color: 'hsl(180 80% 55%)' }}
-              >
-                Explore
-              </h3>
-            )}
+            {/* Trending */}
             <div className="space-y-0.5">
               {categoryLinks.map(link => renderItem(link.icon, link.label, link.path))}
             </div>
