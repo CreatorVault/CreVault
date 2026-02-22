@@ -123,7 +123,7 @@ const Profile = () => {
               <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  {formatViews(profileUser.subscribers)} subscribers
+                  {formatViews(profileUser.subscribers)} patrons
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
@@ -240,7 +240,7 @@ const Profile = () => {
                   <p>Joined {formatDate(profileUser.createdAt)}</p>
                   <p>{formatViews(totalViews)} total views</p>
                   <p>{userVideos.length} videos</p>
-                  <p>{formatViews(profileUser.subscribers)} subscribers</p>
+                  <p>{formatViews(profileUser.subscribers)} patrons</p>
                 </div>
               </div>
             </div>

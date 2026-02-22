@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Users, 
-  Video, 
-  Eye, 
-  TrendingUp, 
-  Trash2, 
+import {
+  Users,
+  Video,
+  Eye,
+  TrendingUp,
+  Trash2,
   Ban,
   MoreVertical,
   Search,
@@ -75,7 +75,7 @@ const Admin = () => {
   };
 
   const handleBlockUser = (userId: string) => {
-    setUsers(users.map(u => 
+    setUsers(users.map(u =>
       u.id === userId ? { ...u, isBlocked: !u.isBlocked } : u
     ));
     const user = users.find(u => u.id === userId);
@@ -104,16 +104,16 @@ const Admin = () => {
     v.author.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
-    trend, 
-    trendUp 
-  }: { 
-    title: string; 
-    value: string; 
-    icon: React.ElementType; 
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    trend,
+    trendUp
+  }: {
+    title: string;
+    value: string;
+    icon: React.ElementType;
     trend?: string;
     trendUp?: boolean;
   }) => (
@@ -212,7 +212,7 @@ const Admin = () => {
                   <TableRow className="border-border hover:bg-transparent">
                     <TableHead className="text-muted-foreground">User</TableHead>
                     <TableHead className="text-muted-foreground">Email</TableHead>
-                    <TableHead className="text-muted-foreground">Subscribers</TableHead>
+                    <TableHead className="text-muted-foreground">Patrons</TableHead>
                     <TableHead className="text-muted-foreground">Joined</TableHead>
                     <TableHead className="text-muted-foreground">Status</TableHead>
                     <TableHead className="w-12"></TableHead>

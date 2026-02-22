@@ -231,7 +231,7 @@ const Watch = () => {
     if (!isAuthenticated) {
       toast({
         title: 'Sign in required',
-        description: 'Please sign in to subscribe.',
+        description: 'Please sign in to become a patron.',
         variant: 'destructive',
       });
       return;
@@ -254,10 +254,10 @@ const Watch = () => {
       .catch(() => { });
 
     toast({
-      title: nextSubscribed ? 'Subscribed!' : 'Unsubscribed',
+      title: nextSubscribed ? 'Patron!' : 'Patron Removed',
       description: nextSubscribed
-        ? `You're now subscribed to ${video.author.username}`
-        : `You unsubscribed from ${video.author.username}`,
+        ? `You're now a patron of ${video.author.username}`
+        : `You removed your patronage from ${video.author.username}`,
     });
   };
 
@@ -385,7 +385,7 @@ const Watch = () => {
                       {video.author.username}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {formatViews(subscribers)} subscribers
+                      {formatViews(subscribers)} patrons
                     </p>
                   </div>
                 </Link>
@@ -399,7 +399,7 @@ const Watch = () => {
                       : 'bg-foreground text-background hover:bg-foreground/90'
                   )}
                 >
-                  {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                  {isSubscribed ? 'Patronizing' : 'Patron'}
                 </Button>
               </div>
 
