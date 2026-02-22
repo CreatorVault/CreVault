@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
+  preview: {
+    port: 3000,
+  },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
