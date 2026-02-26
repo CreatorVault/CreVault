@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, Upload, Bell, User, LogOut, Settings, LayoutDashboard, ArrowLeft, Zap } from 'lucide-react';
+import { Search, Menu, Upload, Bell, User, LogOut, Settings, LayoutDashboard, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -17,6 +17,30 @@ import { cn } from '@/lib/utils';
 interface HeaderProps {
   onMenuToggle?: () => void;
 }
+
+/* ── Hexagonal Vault Door Logo (SVG) ── */
+const VaultLogo = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 32 32" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    {/* Hexagonal outline */}
+    <path
+      d="M16 2 L28 9 L28 23 L16 30 L4 23 L4 9 Z"
+      fill="url(#ember-grad)"
+      stroke="hsl(43 85% 60%)"
+      strokeWidth="0.8"
+    />
+    {/* Inner vault circle */}
+    <circle cx="16" cy="16" r="7" fill="none" stroke="hsl(20 8% 5%)" strokeWidth="1.5" />
+    {/* Vault lock notch */}
+    <rect x="14.5" y="12" width="3" height="5" rx="1" fill="hsl(20 8% 5%)" />
+    <circle cx="16" cy="19" r="1.5" fill="hsl(43 85% 60%)" />
+    <defs>
+      <linearGradient id="ember-grad" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+        <stop stopColor="hsl(18 90% 52%)" />
+        <stop offset="1" stopColor="hsl(38 85% 50%)" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -35,12 +59,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   return (
     <header className="fixed left-0 right-0 top-0 z-50 flex h-16 items-center justify-between gap-4 px-4"
       style={{
-        background: 'hsl(240 16% 7% / 0.92)',
+        background: 'hsl(20 9% 6% / 0.94)',
         backdropFilter: 'blur(20px) saturate(180%)',
-        borderBottom: '1px solid hsl(240 12% 16%)',
+        borderBottom: '1px solid hsl(20 6% 14%)',
       }}
     >
-      {/* Gradient accent line at bottom of header */}
+      {/* Ember accent line at bottom of header */}
       <div className="header-glow-line" />
 
       {/* Mobile Search Overlay */}
@@ -64,8 +88,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 autoFocus
                 className="h-10 w-full rounded-full border-0 pl-4 pr-10 text-foreground placeholder:text-muted-foreground"
                 style={{
-                  background: 'hsl(240 12% 14%)',
-                  boxShadow: 'inset 0 0 0 1px hsl(240 12% 22%)',
+                  background: 'hsl(20 6% 13%)',
+                  boxShadow: 'inset 0 0 0 1px hsl(20 6% 20%)',
                 }}
               />
               <Button
@@ -93,17 +117,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             </Button>
 
             <Link to="/" className="flex items-center gap-2 group">
-              {/* Logo icon — electric bolt instead of play button */}
-              <div
-                className="flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110"
-                style={{
-                  background: 'linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(200 100% 45%) 100%)',
-                  boxShadow: '0 0 16px hsl(180 100% 50% / 0.45)',
-                }}
-              >
-                <Zap className="h-4 w-4 fill-current text-[hsl(240_15%_6%)]" />
+              {/* Hexagonal vault logo */}
+              <div className="flex h-9 w-9 items-center justify-center transition-all duration-300 group-hover:scale-110">
+                <VaultLogo className="h-9 w-9 drop-shadow-[0_0_8px_hsl(18_90%_48%/0.5)]" />
               </div>
-              <span className="hidden text-xl font-bold tracking-tight sm:block" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+              <span className="hidden text-xl font-bold tracking-tight sm:block" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 <span className="text-foreground">Cre</span>
                 <span className="gradient-text">Vault</span>
               </span>
@@ -114,10 +132,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           <form onSubmit={handleSearch} className="hidden max-w-lg flex-1 md:flex">
             <div className="relative w-full">
               <div
-                className="relative flex items-center rounded-full transition-all duration-200 neon-input"
+                className="relative flex items-center rounded-full transition-all duration-200 ember-input"
                 style={{
-                  background: 'hsl(240 12% 12%)',
-                  border: '1px solid hsl(240 12% 20%)',
+                  background: 'hsl(20 6% 11%)',
+                  border: '1px solid hsl(20 6% 18%)',
                 }}
               >
                 <Search className="ml-4 h-4 w-4 shrink-0 text-muted-foreground" />
@@ -132,10 +150,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                   type="submit"
                   className="mr-1 flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 hover:scale-110"
                   style={{
-                    background: 'linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(200 100% 45%) 100%)',
+                    background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(38 85% 50%) 100%)',
                   }}
                 >
-                  <Search className="h-3.5 w-3.5 text-[hsl(240_15%_6%)]" />
+                  <Search className="h-3.5 w-3.5 text-[hsl(20_8%_5%)]" />
                 </button>
               </div>
             </div>
@@ -184,8 +202,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                         <AvatarFallback
                           className="text-sm font-bold"
                           style={{
-                            background: 'linear-gradient(135deg, hsl(270 80% 55%) 0%, hsl(180 100% 50%) 100%)',
-                            color: 'hsl(240 15% 6%)',
+                            background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
+                            color: 'hsl(20 8% 5%)',
                           }}
                         >
                           {user?.username?.charAt(0).toUpperCase()}
@@ -196,9 +214,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                   <DropdownMenuContent
                     className="w-56 border-0"
                     style={{
-                      background: 'hsl(240 14% 10%)',
-                      border: '1px solid hsl(240 12% 20%)',
-                      boxShadow: '0 16px 48px hsl(240 15% 4% / 0.8), 0 0 0 1px hsl(180 100% 50% / 0.08)',
+                      background: 'hsl(20 8% 9%)',
+                      border: '1px solid hsl(20 6% 18%)',
+                      boxShadow: '0 16px 48px hsl(20 8% 3% / 0.8), 0 0 0 1px hsl(18 90% 48% / 0.08)',
                     }}
                     align="end"
                   >
@@ -207,8 +225,8 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                         <AvatarFallback
                           className="text-sm font-bold"
                           style={{
-                            background: 'linear-gradient(135deg, hsl(270 80% 55%) 0%, hsl(180 100% 50%) 100%)',
-                            color: 'hsl(240 15% 6%)',
+                            background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
+                            color: 'hsl(20 8% 5%)',
                           }}
                         >
                           {user?.username?.charAt(0).toUpperCase()}
@@ -219,7 +237,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                         <span className="text-xs text-muted-foreground truncate">{user?.email}</span>
                       </div>
                     </div>
-                    <div className="mx-2 my-1 h-px" style={{ background: 'hsl(240 12% 18%)' }} />
+                    <div className="mx-2 my-1 h-px" style={{ background: 'hsl(20 6% 16%)' }} />
                     <DropdownMenuItem asChild className="cursor-pointer mx-1 rounded-lg text-sidebar-foreground hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                       <Link to={`/profile/${user?.id}`}>
                         <User className="mr-2 h-4 w-4" />
@@ -246,11 +264,11 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                         </Link>
                       </DropdownMenuItem>
                     )}
-                    <div className="mx-2 my-1 h-px" style={{ background: 'hsl(240 12% 18%)' }} />
+                    <div className="mx-2 my-1 h-px" style={{ background: 'hsl(20 6% 16%)' }} />
                     <DropdownMenuItem
                       onClick={logout}
                       className="cursor-pointer mx-1 mb-1 rounded-lg focus:bg-destructive/15 focus:text-destructive"
-                      style={{ color: 'hsl(350 80% 55%)' }}
+                      style={{ color: 'hsl(0 72% 50%)' }}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -263,9 +281,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                 asChild
                 className="rounded-full px-5 font-semibold transition-all duration-300 hover:scale-105"
                 style={{
-                  background: 'linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(200 100% 45%) 100%)',
-                  color: 'hsl(240 15% 6%)',
-                  boxShadow: '0 0 16px hsl(180 100% 50% / 0.3)',
+                  background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(38 85% 50%) 100%)',
+                  color: 'hsl(20 8% 5%)',
+                  boxShadow: '0 0 16px hsl(18 90% 48% / 0.3)',
                   border: 'none',
                 }}
               >

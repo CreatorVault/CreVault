@@ -23,13 +23,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
   const [viewCounted, setViewCounted] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Keep latest callbacks in refs to avoid stale closures and unnecessary effect re-runs
   const onViewStartRef = useRef(onViewStart);
   onViewStartRef.current = onViewStart;
   const onEndedRef = useRef(onEnded);
   onEndedRef.current = onEnded;
 
-  // Reset viewCounted when src changes (new video)
   useEffect(() => {
     setViewCounted(false);
   }, [src]);
@@ -40,8 +38,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
 
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
-
-      // Count view after 3 seconds of watching
       if (!viewCounted && video.currentTime >= 3) {
         setViewCounted(true);
         onViewStartRef.current?.();
@@ -138,7 +134,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
   return (
     <div
       ref={containerRef}
-      className="group relative aspect-video w-full overflow-hidden bg-black sm:rounded-xl"
+      className="group relative w-full aspect-video overflow-hidden bg-black sm:rounded-xl shadow-lg border border-border"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => isPlaying && setShowControls(false)}
     >
@@ -146,7 +142,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
         ref={videoRef}
         src={src}
         poster={poster}
-        className="h-full w-full cursor-pointer"
+        className="h-full w-full cursor-pointer object-contain"
         onClick={togglePlay}
         playsInline
       />
@@ -155,10 +151,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
       {!isPlaying && (
         <button
           onClick={togglePlay}
-          className="absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity"
+          className="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity"
         >
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/90 text-primary-foreground transition-transform hover:scale-110">
-            <Play className="h-10 w-10 fill-current pl-1" />
+          <div
+            className="flex h-20 w-20 items-center justify-center rounded-full transition-transform hover:scale-110"
+            style={{
+              background: 'linear-gradient(135deg, hsl(18 90% 50%) 0%, hsl(38 85% 50%) 100%)',
+              boxShadow: '0 0 32px hsl(18 90% 48% / 0.5)'
+            }}
+          >
+            <Play className="h-10 w-10 fill-current pl-1 text-[hsl(20_8%_5%)]" />
           </div>
         </button>
       )}
@@ -166,7 +168,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
       {/* Controls */}
       <div
         className={cn(
-          'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent px-4 pb-4 pt-12 transition-opacity duration-300',
+          'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent px-4 pb-4 pt-16 transition-opacity duration-300',
           showControls ? 'opacity-100' : 'opacity-0'
         )}
       >
@@ -177,20 +179,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
             max={duration || 100}
             step={0.1}
             onValueChange={handleSeek}
-            className="cursor-pointer [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:bg-primary [&_[role=slider]]:border-0 [&_.relative]:h-1 [&_.relative]:bg-white/30 [&_[data-orientation=horizontal]>.bg-primary]:bg-primary"
+            className="cursor-pointer [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:bg-primary [&_[role=slider]]:border-0 [&_.relative]:h-1.5 [&_.relative]:rounded-full [&_.relative]:bg-white/20 [&_[data-orientation=horizontal]>.bg-primary]:bg-primary"
           />
         </div>
 
         {/* Control buttons */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="icon"
               onClick={togglePlay}
-              className="h-9 w-9 text-white hover:bg-white/20 hover:text-white"
+              className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors"
             >
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 fill-current" />}
             </Button>
 
             <div className="group/volume flex items-center">
@@ -198,7 +200,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
                 variant="ghost"
                 size="icon"
                 onClick={toggleMute}
-                className="h-9 w-9 text-white hover:bg-white/20 hover:text-white"
+                className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors"
               >
                 {isMuted || volume === 0 ? (
                   <VolumeX className="h-5 w-5" />
@@ -206,7 +208,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
                   <Volume2 className="h-5 w-5" />
                 )}
               </Button>
-              <div className="w-0 overflow-hidden transition-all duration-200 group-hover/volume:w-20">
+              <div className="w-0 overflow-hidden transition-all duration-200 group-hover/volume:w-20 hidden sm:block">
                 <Slider
                   value={[isMuted ? 0 : volume]}
                   max={1}
@@ -217,16 +219,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
               </div>
             </div>
 
-            <span className="ml-2 text-sm text-white">
-              {formatTime(currentTime)} / {formatTime(duration)}
+            <span className="ml-1 sm:ml-2 text-xs sm:text-sm text-white/90 font-medium">
+              {formatTime(currentTime)} <span className="text-white/50 mx-1">/</span> {formatTime(duration)}
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-white hover:bg-white/20 hover:text-white"
+              className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors hidden sm:flex"
             >
               <Settings className="h-5 w-5" />
             </Button>
@@ -234,7 +236,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
               variant="ghost"
               size="icon"
               onClick={toggleFullscreen}
-              className="h-9 w-9 text-white hover:bg-white/20 hover:text-white"
+              className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors"
             >
               <Maximize className="h-5 w-5" />
             </Button>
