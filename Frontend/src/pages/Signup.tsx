@@ -1,22 +1,37 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Zap, ArrowRight, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-const inputStyle = {
-  background: 'hsl(240 12% 14%)',
-  boxShadow: 'inset 0 0 0 1px hsl(240 12% 20%)',
-};
+/* ── Hexagonal Vault Door Logo (SVG) ── */
+const VaultLogo = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 32 32" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M16 2 L28 9 L28 23 L16 30 L4 23 L4 9 Z"
+      fill="url(#ember-grad-signup)"
+      stroke="hsl(43 85% 60%)"
+      strokeWidth="0.8"
+    />
+    <circle cx="16" cy="16" r="7" fill="none" stroke="hsl(20 8% 5%)" strokeWidth="1.5" />
+    <rect x="14.5" y="12" width="3" height="5" rx="1" fill="hsl(20 8% 5%)" />
+    <circle cx="16" cy="19" r="1.5" fill="hsl(43 85% 60%)" />
+    <defs>
+      <linearGradient id="ember-grad-signup" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+        <stop stopColor="hsl(18 90% 52%)" />
+        <stop offset="1" stopColor="hsl(38 85% 50%)" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
 
 const Signup = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { signup } = useAuth();
@@ -25,30 +40,20 @@ const Signup = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: 'Please make sure your passwords match.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      const success = await signup(username, email, password);
+      const success = await signup(email, password, username);
       if (success) {
         toast({
-          title: 'Welcome to CreVault!',
-          description: 'Your account has been created successfully.',
+          title: 'Account created!',
+          description: 'Welcome to CreVault.',
         });
         navigate('/');
       } else {
         toast({
           title: 'Signup failed',
-          description: 'Please check your details and try again.',
+          description: 'Email or username already exists. Please try again.',
           variant: 'destructive',
         });
       }
@@ -63,109 +68,79 @@ const Signup = () => {
     }
   };
 
-  const labelClass = "text-xs font-semibold uppercase tracking-widest";
-  const inputClass = "h-11 rounded-xl border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-1";
-
   return (
-    <div
-      className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden"
-      style={{ background: 'hsl(240 15% 6%)' }}
-    >
+    <div className="flex min-h-screen items-center justify-center p-4 py-8 relative overflow-hidden bg-background">
       {/* Background orbs */}
-      <div
-        className="absolute -top-32 -right-32 h-80 w-80 rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, hsl(180 100% 50% / 0.12) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-      />
-      <div
-        className="absolute -bottom-32 -left-32 h-80 w-80 rounded-full pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle, hsl(270 80% 55% / 0.14) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-      />
+      <div className="orb orb-ember h-[600px] w-[600px] -top-64 -right-10" />
+      <div className="orb orb-gold h-[500px] w-[500px] -bottom-48 -left-32" />
 
-      <div className="w-full max-w-md animate-fade-in relative z-10">
+      <div className="w-full max-w-md animate-fade-in relative z-10 flex flex-col items-center">
         {/* Logo */}
-        <Link to="/" className="mb-8 flex items-center justify-center gap-3 group">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110"
-            style={{
-              background: 'linear-gradient(135deg, hsl(180 100% 50%) 0%, hsl(200 100% 45%) 100%)',
-              boxShadow: '0 0 24px hsl(180 100% 50% / 0.4)',
-            }}
-          >
-            <Zap className="h-6 w-6 fill-current text-[hsl(240_15%_6%)]" />
+        <Link to="/" className="mb-6 flex items-center gap-3 group">
+          <div className="flex h-12 w-12 items-center justify-center transition-all duration-300 group-hover:scale-110">
+            <VaultLogo className="h-10 w-10 drop-shadow-[0_0_12px_hsl(18_90%_48%/0.5)]" />
           </div>
-          <span className="text-3xl font-bold tracking-tight" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
+          <span className="text-3xl font-bold tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
             <span className="text-foreground">Cre</span>
             <span className="gradient-text">Vault</span>
           </span>
         </Link>
 
         {/* Card */}
-        <div
-          className="rounded-2xl p-8"
-          style={{
-            background: 'hsl(240 14% 10%)',
-            border: '1px solid hsl(240 12% 18%)',
-            boxShadow: '0 24px 60px hsl(240 15% 4% / 0.8), 0 0 0 1px hsl(180 60% 30% / 0.08)',
-          }}
-        >
-          <div className="mb-7 text-center">
-            <div className="mb-3 flex justify-center">
-              <Sparkles className="h-6 w-6" style={{ color: 'hsl(180 100% 55%)' }} />
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Create your vault</h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Join CreVault and start sharing your content
+        <div className="stat-card w-full backdrop-blur-xl bg-card/80 border-border shadow-2xl relative overflow-hidden p-6 sm:p-8">
+          {/* Card Top Accent Line */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent via-primary to-accent" />
+
+          <div className="mb-8 mt-1 text-center">
+            <h1 className="text-2xl font-bold text-foreground">Join the Creators</h1>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+              Create your account to start uploading, discovering, and connecting.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username */}
-            <div className="space-y-1.5">
-              <Label htmlFor="username" className={labelClass} style={{ color: 'hsl(220 15% 65%)' }}>
+            <div className="space-y-2">
+              <Label htmlFor="username" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Username
               </Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder="johndoe"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-                className={inputClass}
-                style={inputStyle}
-              />
+              <div className="ember-input relative rounded-xl transition-all duration-300">
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="creative_mind"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="h-12 rounded-xl border-border bg-input text-foreground font-medium placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all"
+                />
+              </div>
             </div>
 
             {/* Email */}
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className={labelClass} style={{ color: 'hsl(220 15% 65%)' }}>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Email
               </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className={inputClass}
-                style={inputStyle}
-              />
+              <div className="ember-input relative rounded-xl transition-all duration-300">
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="h-12 rounded-xl border-border bg-input text-foreground font-medium placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all"
+                />
+              </div>
             </div>
 
             {/* Password */}
-            <div className="space-y-1.5">
-              <Label htmlFor="password" className={labelClass} style={{ color: 'hsl(220 15% 65%)' }}>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                 Password
               </Label>
-              <div className="relative">
+              <div className="ember-input relative rounded-xl transition-all duration-300">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -174,78 +149,61 @@ const Signup = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className={`${inputClass} pr-11`}
-                  style={inputStyle}
+                  className="h-12 rounded-xl border-border bg-input text-foreground font-medium placeholder:text-muted-foreground/50 pr-12 focus-visible:ring-0 focus-visible:ring-offset-0 transition-all"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-0 h-11 px-3 text-muted-foreground hover:text-primary hover:bg-transparent"
+                  className="absolute right-1 top-1 h-10 w-10 text-muted-foreground hover:text-primary hover:bg-transparent transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-            </div>
-
-            {/* Confirm Password */}
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmPassword" className={labelClass} style={{ color: 'hsl(220 15% 65%)' }}>
-                Confirm Password
-              </Label>
-              <Input
-                id="confirmPassword"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-                className={inputClass}
-                style={inputStyle}
-              />
+              <p className="text-[10px] text-muted-foreground/80 mt-1.5 ml-1 font-medium">
+                Must be at least 6 characters long
+              </p>
             </div>
 
             {/* Submit */}
             <button
               type="submit"
               disabled={isLoading}
-              className="relative w-full h-11 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
+              className="group relative w-full h-12 mt-4 rounded-xl font-bold text-[hsl(20_8%_5%)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed flex items-center justify-center gap-2 overflow-hidden"
               style={{
-                background: isLoading
-                  ? 'hsl(270 40% 35%)'
-                  : 'linear-gradient(135deg, hsl(270 80% 60%) 0%, hsl(200 100% 50%) 100%)',
-                color: 'hsl(240 15% 6%)',
-                boxShadow: isLoading ? 'none' : '0 0 20px hsl(270 80% 55% / 0.3)',
+                background: isLoading ? 'hsl(18 60% 40%)' : 'var(--gradient-primary)',
+                boxShadow: isLoading ? 'none' : 'var(--shadow-glow-ember)'
               }}
             >
               {isLoading ? (
                 <>
-                  <div
-                    className="h-4 w-4 animate-spin rounded-full"
-                    style={{ border: '2px solid hsl(240 15% 20%)', borderTopColor: 'hsl(240 15% 6%)' }}
-                  />
-                  Creating account...
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[hsl(20_8%_5%/0.3)] border-t-[hsl(20_8%_5%)]" />
+                  Creating Account...
                 </>
               ) : (
                 <>
-                  Create Account
-                  <ArrowRight className="h-4 w-4" />
+                  <span className="relative z-10 flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Forge Your Vault
+                  </span>
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-[shimmer_1.5s_infinite]" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link
-              to="/login"
-              className="font-semibold hover:underline transition-colors"
-              style={{ color: 'hsl(180 100% 55%)' }}
-            >
-              Sign in
-            </Link>
+          {/* Login link */}
+          <div className="mt-8 pt-6 border-t border-border/80 text-center">
+            <p className="text-sm text-muted-foreground font-medium">
+              Already have an account?{' '}
+              <Link
+                to="/login"
+                className="font-bold text-primary hover:text-accent hover:underline transition-colors ml-1"
+              >
+                Sign In
+              </Link>
+            </p>
           </div>
         </div>
       </div>

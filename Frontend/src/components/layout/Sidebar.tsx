@@ -60,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           className={cn(
             'h-5 w-5 shrink-0 transition-all duration-200',
             isActive
-              ? 'text-primary drop-shadow-[0_0_6px_hsl(180_100%_50%/0.8)]'
+              ? 'text-primary drop-shadow-[0_0_6px_hsl(18_90%_48%/0.8)]'
               : 'text-sidebar-foreground group-hover:text-accent-foreground',
             !isOpen && 'md:h-5 md:w-5 md:mr-0'
           )}
@@ -102,15 +102,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           'md:translate-x-0'
         )}
         style={{
-          background: 'hsl(240 16% 8%)',
-          borderRight: '1px solid hsl(240 12% 15%)',
+          background: 'hsl(20 9% 7%)',
+          borderRight: '1px solid hsl(20 6% 13%)',
         }}
       >
-        {/* Subtle top glow accent */}
+        {/* Subtle top ember accent */}
         <div
           className="absolute top-0 left-0 right-0 h-px"
           style={{
-            background: 'linear-gradient(90deg, transparent, hsl(270 80% 55% / 0.4), hsl(180 100% 50% / 0.4), transparent)',
+            background: 'linear-gradient(90deg, transparent, hsl(43 85% 55% / 0.3), hsl(18 90% 48% / 0.5), transparent)',
           }}
         />
 
@@ -135,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             <div
               className="my-3 h-px mx-2"
-              style={{ background: 'linear-gradient(90deg, transparent, hsl(240 12% 22%), transparent)' }}
+              style={{ background: 'linear-gradient(90deg, transparent, hsl(20 6% 20%), transparent)' }}
             />
 
             {/* Library */}
@@ -147,7 +147,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       "mb-1 px-3 text-[11px] font-semibold uppercase tracking-widest",
                       !isOpen && "md:hidden"
                     )}
-                    style={{ color: 'hsl(270 60% 65%)' }}
+                    style={{ color: 'hsl(43 60% 55%)' }}
                   >
                     Library
                   </h3>
@@ -157,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div
                   className="my-3 h-px mx-2"
-                  style={{ background: 'linear-gradient(90deg, transparent, hsl(240 12% 22%), transparent)' }}
+                  style={{ background: 'linear-gradient(90deg, transparent, hsl(20 6% 20%), transparent)' }}
                 />
               </>
             )}
@@ -172,7 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <>
                 <div
                   className="my-3 h-px mx-2"
-                  style={{ background: 'linear-gradient(90deg, transparent, hsl(240 12% 22%), transparent)' }}
+                  style={{ background: 'linear-gradient(90deg, transparent, hsl(20 6% 20%), transparent)' }}
                 />
                 {renderItem(Settings, 'Admin Panel', '/admin')}
               </>
@@ -182,11 +182,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {/* Bottom decoration */}
           {isOpen && (
             <div className="p-4 m-2 mb-4 rounded-xl" style={{
-              background: 'linear-gradient(135deg, hsl(270 40% 14%) 0%, hsl(240 20% 12%) 100%)',
-              border: '1px solid hsl(270 40% 20%)',
+              background: 'linear-gradient(135deg, hsl(20 10% 10%) 0%, hsl(25 8% 8%) 100%)',
+              border: '1px solid hsl(18 40% 18%)',
             }}>
-              <p className="text-xs font-semibold" style={{ color: 'hsl(270 80% 72%)' }}>CreVault</p>
-              <p className="text-[11px] mt-0.5" style={{ color: 'hsl(240 10% 50%)' }}>Your creative universe</p>
+              <p className="text-xs font-semibold" style={{ color: 'hsl(18 90% 55%)' }}>CreVault</p>
+              <p className="text-[11px] mt-0.5" style={{ color: 'hsl(30 8% 45%)' }}>Your creative ember</p>
             </div>
           )}
         </div>
