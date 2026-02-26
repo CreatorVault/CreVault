@@ -10,6 +10,7 @@ import { formatViews, formatDate, Video } from '@/lib/mockData';
 import { getUserProfile, getUserVideos, ApiUserProfile } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const Profile = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -23,7 +24,6 @@ const Profile = () => {
 
   const isOwnProfile = currentUser?.id === userId;
 
-  // Fetch profile and videos from the backend
   useEffect(() => {
     if (!userId) {
       setLoading(false);
@@ -63,37 +63,22 @@ const Profile = () => {
   if (loading) {
     return (
       <MainLayout>
-        <div className="flex h-[60vh] items-center justify-center">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="flex h-[80vh] items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary" />
         </div>
       </MainLayout>
     );
   }
 
-  if (error) {
+  if (error || !profileUser) {
     return (
       <MainLayout>
-        <div className="flex h-[60vh] items-center justify-center">
-          <div className="text-center">
-            <p className="text-destructive">{error}</p>
-            <Button asChild className="mt-4">
-              <Link to="/">Go Home</Link>
-            </Button>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  if (!profileUser) {
-    return (
-      <MainLayout>
-        <div className="flex h-[60vh] items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground">User not found</h1>
-            <p className="mt-2 text-muted-foreground">This channel doesn't exist.</p>
-            <Button asChild className="mt-4">
-              <Link to="/">Go Home</Link>
+        <div className="flex h-[80vh] items-center justify-center">
+          <div className="text-center stat-card p-10 backdrop-blur-md border border-border/50">
+            <h1 className="text-2xl font-bold text-foreground mb-3">{error ? 'Operation Failed' : 'User not found'}</h1>
+            <p className="text-muted-foreground mb-6 font-medium">{error || 'This channel does not exist in the vault.'}</p>
+            <Button asChild className="btn-primary-glow font-bold" style={{ background: 'var(--gradient-primary)', color: 'hsl(20 8% 5%)' }}>
+              <Link to="/">Return to Vault</Link>
             </Button>
           </div>
         </div>
@@ -103,48 +88,62 @@ const Profile = () => {
 
   return (
     <MainLayout>
-      <div className="p-4 sm:p-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-[2000px] mx-auto animate-fade-in min-h-screen">
         {/* Banner */}
-        <div className="h-32 rounded-xl bg-gradient-to-r from-primary/20 via-primary/10 to-secondary sm:h-48" />
+        <div
+          className="h-32 sm:h-48 md:h-56 rounded-2xl w-full"
+          style={{
+            background: 'linear-gradient(135deg, hsl(18 90% 48% / 0.4) 0%, hsl(38 85% 50% / 0.1) 50%, hsl(20 8% 5%) 100%)',
+            border: '1px solid hsl(18 90% 48% / 0.2)',
+            boxShadow: 'inset 0 0 100px hsl(20 8% 5% / 0.8)'
+          }}
+        />
 
         {/* Profile header */}
-        <div className="relative -mt-16 mb-6 flex flex-col items-start gap-4 px-4 sm:flex-row sm:items-end sm:px-6">
-          <Avatar className="h-24 w-24 border-4 border-background sm:h-32 sm:w-32">
-            <AvatarFallback className="bg-primary text-3xl text-primary-foreground">
+        <div className="relative -mt-16 sm:-mt-20 flex flex-col items-start gap-4 px-4 sm:flex-row sm:items-end sm:px-6 mb-8">
+          <Avatar className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl border-4" style={{ borderColor: 'hsl(20 8% 5%)', boxShadow: '0 0 30px hsl(18 90% 48% / 0.3)' }}>
+            <AvatarFallback
+              className="text-4xl sm:text-5xl font-bold rounded-2xl text-[hsl(20_8%_5%)]"
+              style={{ background: 'linear-gradient(135deg, hsl(43 85% 60%) 0%, hsl(18 90% 48%) 100%)' }}
+            >
               {profileUser.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between w-full pt-2 sm:pt-0">
             <div>
-              <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+              <h1 className="text-2xl font-bold text-foreground sm:text-4xl tracking-tight mb-2">
                 {profileUser.name}
               </h1>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Users className="h-4 w-4" />
-                  {formatViews(profileUser.subscribers)} patrons
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground font-medium">
+                <span className="flex items-center gap-1.5 text-foreground">
+                  <span className="text-primary font-bold">{formatViews(profileUser.subscribers)}</span> patrons
                 </span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
-                  <VideoIcon className="h-4 w-4" />
-                  {userVideos.length} videos
+                <span className="hidden sm:inline opacity-30">•</span>
+                <span className="flex items-center gap-1.5">
+                  <VideoIcon className="h-4 w-4 text-accent" />
+                  {userVideos.length} creations
                 </span>
-                <span>•</span>
-                <span className="flex items-center gap-1">
+                <span className="hidden sm:inline opacity-30">•</span>
+                <span className="flex items-center gap-1.5">
                   <Calendar className="h-4 w-4" />
-                  Joined {formatDate(profileUser.createdAt)}
+                  Forged {formatDate(profileUser.createdAt)}
                 </span>
               </div>
             </div>
 
-            <div className="flex gap-2">
-              {isOwnProfile && (
-                <Button variant="secondary" className="gap-2" asChild>
+            <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+              {isOwnProfile ? (
+                <Button variant="secondary" className="gap-2 w-full sm:w-auto font-bold border border-border/50 hover:bg-accent" asChild>
                   <Link to="/dashboard">
                     <Settings className="h-4 w-4" />
-                    Manage Channel
+                    Manage Vault
                   </Link>
+                </Button>
+              ) : (
+                <Button className="w-full sm:w-auto gap-2 font-bold px-8 btn-primary-glow" style={{ background: 'var(--gradient-primary)', color: 'hsl(20 8% 5%)' }}>
+                  <Users className="h-4 w-4" />
+                  Patron
                 </Button>
               )}
             </div>
@@ -153,94 +152,116 @@ const Profile = () => {
 
         {/* Stats row for own profile */}
         {isOwnProfile && (
-          <div className="mb-6 grid grid-cols-1 gap-4 px-4 sm:grid-cols-3 sm:px-6">
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
-                <VideoIcon className="h-5 w-5 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Videos</p>
-                <p className="text-xl font-bold text-foreground">{userVideos.length}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
-                <Eye className="h-5 w-5 text-emerald-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Views</p>
-                <p className="text-xl font-bold text-foreground">{formatViews(totalViews)}</p>
+          <div className="mb-10 grid grid-cols-1 gap-4 px-2 sm:grid-cols-3 sm:px-0">
+            <div className="stat-card p-5 group">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110" style={{ background: 'hsl(18 90% 48% / 0.1)', border: '1px solid hsl(18 90% 48% / 0.2)' }}>
+                  <VideoIcon className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Creations</p>
+                  <p className="text-2xl font-bold text-foreground">{userVideos.length}</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-500/10">
-                <ThumbsUp className="h-5 w-5 text-rose-500" />
+
+            <div className="stat-card p-5 group">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110" style={{ background: 'hsl(38 85% 50% / 0.1)', border: '1px solid hsl(38 85% 50% / 0.2)' }}>
+                  <Eye className="h-6 w-6 text-accent" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Total Views</p>
+                  <p className="text-2xl font-bold text-foreground">{formatViews(totalViews)}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Likes</p>
-                <p className="text-xl font-bold text-foreground">{formatViews(totalLikes)}</p>
+            </div>
+
+            <div className="stat-card p-5 group">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl transition-transform group-hover:scale-110" style={{ background: 'hsl(43 85% 60% / 0.1)', border: '1px solid hsl(43 85% 60% / 0.2)' }}>
+                  <ThumbsUp className="h-6 w-6" style={{ color: 'hsl(43 85% 60%)' }} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Total Approvals</p>
+                  <p className="text-2xl font-bold text-foreground">{formatViews(totalLikes)}</p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
         {/* Tabs */}
-        <Tabs defaultValue="videos" className="mt-6">
-          <TabsList className="h-12 w-full justify-start gap-4 rounded-none border-b border-border bg-transparent p-0">
+        <Tabs defaultValue="videos" className="mt-4 px-2 sm:px-0">
+          <TabsList className="h-14 w-full justify-start gap-4 sm:gap-8 rounded-none border-b border-border bg-transparent p-0 overflow-x-auto scrollbar-hide">
             <TabsTrigger
               value="videos"
-              className="h-12 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="h-14 rounded-none border-b-2 border-transparent px-2 sm:px-4 text-base font-bold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
             >
-              Videos
+              Creations
             </TabsTrigger>
             <TabsTrigger
               value="about"
-              className="h-12 rounded-none border-b-2 border-transparent px-4 data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+              className="h-14 rounded-none border-b-2 border-transparent px-2 sm:px-4 text-base font-bold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
             >
-              About
+              Lore & Details
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="videos" className="mt-6">
+          <TabsContent value="videos" className="mt-8">
             {userVideos.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {userVideos.map(video => (
                   <VideoCard key={video.id} video={video} />
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20">
-                <VideoIcon className="mb-4 h-16 w-16 text-muted-foreground" />
-                <h2 className="text-xl font-semibold text-foreground">No videos yet</h2>
-                <p className="mt-2 text-muted-foreground">
+              <div className="flex flex-col items-center justify-center py-32 text-center stat-card border-dashed">
+                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-secondary border border-border">
+                  <VideoIcon className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <h2 className="text-xl font-bold text-foreground mb-2">The forge is silent</h2>
+                <p className="text-sm text-muted-foreground max-w-sm mb-6 font-medium">
                   {isOwnProfile
-                    ? 'Upload your first video to get started!'
-                    : 'This channel hasn\'t uploaded any videos yet.'}
+                    ? 'Upload your first creation to start building your legacy.'
+                    : 'This creator has not forged any ambers yet.'}
                 </p>
                 {isOwnProfile && (
-                  <Button asChild className="mt-4 bg-primary text-primary-foreground">
-                    <Link to="/upload">Upload a video</Link>
+                  <Button asChild className="font-bold px-8 btn-primary-glow" style={{ background: 'var(--gradient-primary)', color: 'hsl(20 8% 5%)' }}>
+                    <Link to="/upload">Ignite the Forge</Link>
                   </Button>
                 )}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="about" className="mt-6">
-            <div className="max-w-2xl space-y-4">
-              <div>
-                <h3 className="font-semibold text-foreground">Description</h3>
-                <p className="mt-2 text-muted-foreground">
-                  Welcome to {profileUser.name}'s channel! Stay tuned for awesome content.
+          <TabsContent value="about" className="mt-8">
+            <div className="grid md:grid-cols-3 gap-8 max-w-5xl">
+              <div className="md:col-span-2 space-y-4 stat-card p-6 md:p-8">
+                <h3 className="font-bold uppercase tracking-widest text-xs text-muted-foreground mb-2">Lore</h3>
+                <p className="text-foreground/90 font-medium leading-relaxed whitespace-pre-wrap">
+                  Welcome to {profileUser.name}'s realm! Stay tuned for awesome creations. The embers are just starting to burn.
                 </p>
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground">Stats</h3>
-                <div className="mt-2 space-y-1 text-muted-foreground">
-                  <p>Joined {formatDate(profileUser.createdAt)}</p>
-                  <p>{formatViews(totalViews)} total views</p>
-                  <p>{userVideos.length} videos</p>
-                  <p>{formatViews(profileUser.subscribers)} patrons</p>
+              <div className="stat-card p-6 md:p-8 space-y-6 h-fit bg-secondary/30">
+                <h3 className="font-bold uppercase tracking-widest text-xs text-muted-foreground border-b border-border/50 pb-3">Statistics</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-muted-foreground">Forged Date</p>
+                    <p className="text-sm font-bold text-foreground">{formatDate(profileUser.createdAt)}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-muted-foreground">Total Impact</p>
+                    <p className="text-sm font-bold text-foreground">{formatViews(totalViews)} views</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-muted-foreground">Creations</p>
+                    <p className="text-sm font-bold text-foreground">{userVideos.length}</p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-muted-foreground">Patrons</p>
+                    <p className="text-sm font-bold text-primary">{formatViews(profileUser.subscribers)}</p>
+                  </div>
                 </div>
               </div>
             </div>

@@ -18,24 +18,12 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
     return (
       <div
         onClick={goToVideo}
-        className="group flex cursor-pointer gap-4 rounded-2xl p-3 transition-all duration-300 hover:-translate-y-0.5"
+        className="group flex flex-col sm:flex-row cursor-pointer gap-4 rounded-2xl p-3 transition-all duration-300 hover:-translate-y-0.5 video-card"
         role="link"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === 'Enter') goToVideo(); }}
-        style={{
-          background: 'hsl(240 14% 10%)',
-          border: '1px solid hsl(240 12% 16%)',
-        }}
-        onMouseEnter={e => {
-          (e.currentTarget as HTMLElement).style.borderColor = 'hsl(180 100% 50% / 0.3)';
-          (e.currentTarget as HTMLElement).style.boxShadow = '0 0 20px hsl(180 100% 50% / 0.1)';
-        }}
-        onMouseLeave={e => {
-          (e.currentTarget as HTMLElement).style.borderColor = 'hsl(240 12% 16%)';
-          (e.currentTarget as HTMLElement).style.boxShadow = 'none';
-        }}
       >
-        <div className="video-thumbnail w-40 shrink-0 sm:w-64 rounded-xl overflow-hidden">
+        <div className="video-thumbnail w-full sm:w-64 shrink-0 rounded-xl overflow-hidden aspect-video">
           <img
             src={video.thumbnail}
             alt={video.title}
@@ -44,39 +32,39 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
           <span className="video-duration">{video.duration}</span>
         </div>
 
-        <div className="flex flex-col gap-2 py-1 min-w-0">
+        <div className="flex flex-col gap-2 py-1 min-w-0 flex-1">
           <h3 className="line-clamp-2 text-sm font-semibold text-foreground group-hover:text-primary transition-colors sm:text-base">
             {video.title}
           </h3>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Eye className="h-3 w-3" />
+            <span className="flex items-center gap-1 group-hover:text-primary/70 transition-colors">
+              <Eye className="h-3.5 w-3.5" />
               {formatViews(video.views)}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
+              <Clock className="h-3.5 w-3.5 opacity-70" />
               {formatDate(video.uploadedAt)}
             </span>
           </div>
           <Link
             to={`/profile/${video.author.id}`}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors w-fit"
+            className="flex items-center gap-2 text-sm text-sidebar-foreground hover:text-accent-foreground transition-colors w-fit mt-1"
             onClick={(e) => e.stopPropagation()}
           >
-            <Avatar className="h-6 w-6">
+            <Avatar className="h-6 w-6 avatar-ring">
               <AvatarFallback
-                className="text-xs font-bold"
+                className="text-[10px] font-bold"
                 style={{
-                  background: 'linear-gradient(135deg, hsl(270 80% 55%) 0%, hsl(180 100% 50%) 100%)',
-                  color: 'hsl(240 15% 6%)',
+                  background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
+                  color: 'hsl(20 8% 5%)',
                 }}
               >
                 {video.author.username.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <span>{video.author.username}</span>
+            <span className="font-medium">{video.author.username}</span>
           </Link>
-          <p className="line-clamp-2 text-xs text-muted-foreground">{video.description}</p>
+          <p className="line-clamp-2 text-xs text-muted-foreground mt-1 hidden sm:block">{video.description}</p>
         </div>
       </div>
     );
@@ -85,7 +73,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
   return (
     <div
       onClick={goToVideo}
-      className="video-card group animate-fade-in cursor-pointer"
+      className="video-card group animate-fade-in cursor-pointer flex flex-col h-full"
       role="link"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter') goToVideo(); }}
@@ -102,16 +90,16 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
         {/* Hover play overlay */}
         <div
           className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={{ background: 'hsl(240 15% 6% / 0.45)' }}
+          style={{ background: 'hsl(20 8% 5% / 0.4)' }}
         >
           <div
-            className="flex h-12 w-12 items-center justify-center rounded-full"
+            className="flex h-12 w-12 items-center justify-center rounded-full transition-transform group-hover:scale-110"
             style={{
-              background: 'hsl(180 100% 50% / 0.9)',
-              boxShadow: '0 0 20px hsl(180 100% 50% / 0.6)',
+              background: 'hsl(18 90% 48% / 0.9)',
+              boxShadow: '0 0 24px hsl(18 90% 48% / 0.6)',
             }}
           >
-            <svg className="h-5 w-5 ml-0.5 text-[hsl(240_15%_6%)]" fill="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5 ml-0.5" style={{ color: 'hsl(20 8% 5%)' }} fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
@@ -119,18 +107,18 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
       </div>
 
       {/* Card body */}
-      <div className="flex gap-3 p-3">
+      <div className="flex gap-3 p-3 flex-1">
         <Link
           to={`/profile/${video.author.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="shrink-0"
+          className="shrink-0 pt-0.5"
         >
-          <Avatar className="h-9 w-9 transition-transform duration-200 hover:scale-110">
+          <Avatar className="h-9 w-9 transition-transform duration-200 hover:scale-110 avatar-ring">
             <AvatarFallback
               className="text-sm font-bold"
               style={{
-                background: 'linear-gradient(135deg, hsl(270 80% 55%) 0%, hsl(180 100% 50%) 100%)',
-                color: 'hsl(240 15% 6%)',
+                background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
+                color: 'hsl(20 8% 5%)',
               }}
             >
               {video.author.username.charAt(0)}
@@ -138,19 +126,19 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
           </Avatar>
         </Link>
 
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col">
           <h3 className="line-clamp-2 text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">
             {video.title}
           </h3>
           <Link
             to={`/profile/${video.author.id}`}
-            className="mt-1 block text-xs text-muted-foreground hover:text-primary transition-colors font-medium"
+            className="mt-1 block text-xs text-muted-foreground hover:text-primary transition-colors font-medium truncate"
             onClick={(e) => e.stopPropagation()}
           >
             {video.author.username}
           </Link>
           <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 group-hover:text-primary/70 transition-colors">
               <Eye className="h-3 w-3 opacity-70" />
               {formatViews(video.views)}
             </span>
