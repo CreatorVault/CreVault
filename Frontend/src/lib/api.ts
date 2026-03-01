@@ -270,6 +270,7 @@ export async function getDashboardStats(): Promise<{
     },
   });
   if (!res.ok) {
+    if (res.status === 401) throw new Error("UNAUTHORIZED");
     throw new Error(`Failed to fetch dashboard stats: ${res.status}`);
   }
   const data: DashboardStats = await res.json();

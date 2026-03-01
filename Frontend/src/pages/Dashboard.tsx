@@ -45,7 +45,7 @@ const PATRON_THRESHOLD = 2000;
 const EARNINGS_RATE = 0.40; // ₹ per view
 
 const Dashboard = () => {
-    const { user, isAuthenticated, isLoading } = useAuth();
+    const { user, isAuthenticated, isLoading, logout } = useAuth();
     const { toast } = useToast();
     const navigate = useNavigate();
 
@@ -75,7 +75,17 @@ const Dashboard = () => {
         try {
             const data = await getDashboardStats();
             setStats(data);
-        } catch (err) {
+        } catch (err: any) {
+            if (err.message === "UNAUTHORIZED") {
+                toast({
+                    title: 'Session Expired',
+                    description: 'Please log in again.',
+                    variant: 'destructive',
+                });
+                logout();
+                navigate('/login');
+                return;
+            }
             toast({
                 title: 'Vault Sync Failed',
                 description: 'Could not load dashboard data. Is the backend running?',
