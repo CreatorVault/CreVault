@@ -43,7 +43,7 @@ export const getUploadSignature = async (req: Request, res: Response) => {
 
 export const uploadVideo = async (req: Request, res: Response) => {
   try {
-    const { title, description, videoUrl: bodyVideoUrl, thumbnailUrl: bodyThumbnailUrl } = req.body;
+    const { title, description, videoUrl: bodyVideoUrl, thumbnailUrl: bodyThumbnailUrl, duration: bodyDuration } = req.body;
 
     // Check for video URL from middleware (if used) or body (direct upload)
     const videoUrl = (req as any).videoUrl || bodyVideoUrl;
@@ -53,12 +53,15 @@ export const uploadVideo = async (req: Request, res: Response) => {
     }
 
     const thumbnailUrl = (req as any).thumbnailUrl || bodyThumbnailUrl || undefined;
+    // duration in seconds (number), sent from the frontend after video metadata is read
+    const duration = bodyDuration ? Number(bodyDuration) : 0;
 
     const video = await Video.create({
       title,
       description,
       videoUrl,
       thumbnailUrl,
+      duration,
       user: (req as any).user.id,
     });
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, Upload, Bell, User, LogOut, Settings, LayoutDashboard, ArrowLeft } from 'lucide-react';
+import { Search, Menu, Upload, User, LogOut, Settings, LayoutDashboard, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -12,35 +12,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onMenuToggle?: () => void;
 }
 
-/* ── Hexagonal Vault Door Logo (SVG) ── */
-const VaultLogo = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 32 32" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-    {/* Hexagonal outline */}
-    <path
-      d="M16 2 L28 9 L28 23 L16 30 L4 23 L4 9 Z"
-      fill="url(#ember-grad)"
-      stroke="hsl(43 85% 60%)"
-      strokeWidth="0.8"
-    />
-    {/* Inner vault circle */}
-    <circle cx="16" cy="16" r="7" fill="none" stroke="hsl(20 8% 5%)" strokeWidth="1.5" />
-    {/* Vault lock notch */}
-    <rect x="14.5" y="12" width="3" height="5" rx="1" fill="hsl(20 8% 5%)" />
-    <circle cx="16" cy="19" r="1.5" fill="hsl(43 85% 60%)" />
-    <defs>
-      <linearGradient id="ember-grad" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
-        <stop stopColor="hsl(18 90% 52%)" />
-        <stop offset="1" stopColor="hsl(38 85% 50%)" />
-      </linearGradient>
-    </defs>
-  </svg>
-);
+/* ── CreVault Logo Image ── */
 
 const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -52,6 +29,9 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/?search=${encodeURIComponent(searchQuery.trim())}`);
+      setShowMobileSearch(false);
+    } else {
+      navigate('/');
       setShowMobileSearch(false);
     }
   };
@@ -117,9 +97,12 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             </Button>
 
             <Link to="/" className="flex items-center gap-2 group">
-              {/* Hexagonal vault logo */}
               <div className="flex h-9 w-9 items-center justify-center transition-all duration-300 group-hover:scale-110">
-                <VaultLogo className="h-9 w-9 drop-shadow-[0_0_8px_hsl(18_90%_48%/0.5)]" />
+                <img
+                  src="/crevault-logo.jpg"
+                  alt="CreVault Logo"
+                  className="h-9 w-9 rounded-md object-cover drop-shadow-[0_0_8px_hsl(18_90%_48%/0.5)]"
+                />
               </div>
               <span className="hidden text-xl font-bold tracking-tight sm:block" style={{ fontFamily: 'Outfit, sans-serif' }}>
                 <span className="text-foreground">Cre</span>
@@ -183,15 +166,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                   <Link to="/upload">
                     <Upload className="h-5 w-5" />
                   </Link>
-                </Button>
-
-                {/* Notification bell */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hidden text-muted-foreground hover:text-primary hover:bg-accent sm:flex"
-                >
-                  <Bell className="h-5 w-5" />
                 </Button>
 
                 {/* User dropdown */}

@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: true,
+  origin: process.env.FRONTEND_URL || true, // Set FRONTEND_URL=https://your-frontend.vercel.app in Vercel env vars
   credentials: true,
 }));
 app.use(express.json({ limit: '50mb' }));
