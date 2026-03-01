@@ -34,6 +34,7 @@ const Upload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [videoDuration, setVideoDuration] = useState(0);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
 
@@ -94,6 +95,16 @@ const Upload = () => {
       return;
     }
     setVideoFile(file);
+    // Read video duration from browser metadata
+    setVideoDuration(0);
+    const tempUrl = URL.createObjectURL(file);
+    const tempVideo = document.createElement('video');
+    tempVideo.preload = 'metadata';
+    tempVideo.onloadedmetadata = () => {
+      setVideoDuration(Math.round(tempVideo.duration));
+      URL.revokeObjectURL(tempUrl);
+    };
+    tempVideo.src = tempUrl;
   }
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,6 +117,11 @@ const Upload = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const removeThumbnail = () => {
+    setThumbnailFile(null);
+    setThumbnailPreview('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,7 +190,7 @@ const Upload = () => {
 
       await axios.post(
         `${apiBase}/api/videos/create`,
-        { title, description, category, videoUrl, thumbnailUrl: thumbnailUrl || undefined },
+        { title, description, category, videoUrl, thumbnailUrl: thumbnailUrl || undefined, duration: videoDuration },
         { headers: authHeaders }
       );
 

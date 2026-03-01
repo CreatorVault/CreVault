@@ -2,17 +2,13 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import VideoCard from '@/components/video/VideoCard';
-import { categories } from '@/lib/mockData';
 import type { Video } from '@/lib/mockData';
 import { getVideos } from '@/lib/api';
-import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
 
 const Home = () => {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
-  const categoryParam = searchParams.get('category') || 'All';
-  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -49,34 +45,15 @@ const Home = () => {
       );
     }
 
-    if (selectedCategory !== 'All') {
-      list = list.filter((video) => video.category === selectedCategory);
-    }
-
     return list;
-  }, [videos, searchQuery, selectedCategory]);
+  }, [videos, searchQuery]);
 
   return (
     <MainLayout>
       <div className="p-4 sm:p-6 lg:p-8 animate-fade-in w-full max-w-[2000px] mx-auto min-h-screen">
 
-        {/* Category filter pills */}
-        <div className="mb-6 flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-          {categories.map(category => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={cn(
-                'category-pill',
-                selectedCategory === category
-                  ? 'category-pill-active'
-                  : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground hover:shadow-[0_0_12px_hsl(18_90%_48%/0.15)] shadow-sm'
-              )}
-            >
-              {category}
-            </button>
-          ))}
-        </div>
+
+
 
         {/* Search results header */}
         {searchQuery && (

@@ -9,6 +9,7 @@ export interface IVideo extends Document {
   views: number;
   likes: number;
   dislikes: number;
+  duration?: number;
   createdAt: Date;
 }
 
@@ -51,6 +52,11 @@ const VideoSchema: Schema = new Schema(
     },
 
     dislikes: {
+      type: Number,
+      default: 0,
+    },
+
+    duration: {
       type: Number,
       default: 0,
     },

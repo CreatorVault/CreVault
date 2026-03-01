@@ -1,14 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import VideoCard from '@/components/video/VideoCard';
-import { categories } from '@/lib/mockData';
 import type { Video } from '@/lib/mockData';
 import { getVideos } from '@/lib/api';
-import { cn } from '@/lib/utils';
 import { Compass } from 'lucide-react';
 
 const Explore = () => {
-    const [selectedCategory, setSelectedCategory] = useState('All');
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -29,11 +26,6 @@ const Explore = () => {
             });
         return () => { cancelled = true; };
     }, []);
-
-    const filteredVideos = useMemo(() => {
-        if (selectedCategory === 'All') return videos;
-        return videos.filter((v) => v.category === selectedCategory);
-    }, [videos, selectedCategory]);
 
     return (
         <MainLayout>
@@ -57,23 +49,7 @@ const Explore = () => {
                     </div>
                 </div>
 
-                {/* Category filter pills */}
-                <div className="mb-8 flex gap-2 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
-                    {categories.map((category) => (
-                        <button
-                            key={category}
-                            onClick={() => setSelectedCategory(category)}
-                            className={cn(
-                                'category-pill',
-                                selectedCategory === category
-                                    ? 'category-pill-active'
-                                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground hover:shadow-[0_0_12px_hsl(18_90%_48%/0.15)] shadow-sm'
-                            )}
-                        >
-                            {category}
-                        </button>
-                    ))}
-                </div>
+
 
                 {/* Loading */}
                 {loading && (
@@ -111,9 +87,9 @@ const Explore = () => {
                 )}
 
                 {/* Video grid */}
-                {!loading && !error && filteredVideos.length > 0 ? (
+                {!loading && !error && videos.length > 0 ? (
                     <div className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                        {filteredVideos.map((video) => (
+                        {videos.map((video) => (
                             <VideoCard key={video.id} video={video} />
                         ))}
                     </div>

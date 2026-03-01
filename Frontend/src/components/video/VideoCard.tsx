@@ -29,7 +29,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
             alt={video.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <span className="video-duration">{video.duration}</span>
+          {video.duration && <span className="video-duration">{video.duration}</span>}
         </div>
 
         <div className="flex flex-col gap-2 py-1 min-w-0 flex-1">
@@ -85,7 +85,7 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
           alt={video.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <span className="video-duration">{video.duration}</span>
+        {video.duration && <span className="video-duration">{video.duration}</span>}
 
         {/* Hover play overlay */}
         <div

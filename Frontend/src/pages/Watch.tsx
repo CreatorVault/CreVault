@@ -5,11 +5,11 @@ import {
   ThumbsDown,
   Share2,
   Flag,
-  Download,
   MoreHorizontal,
   Eye,
   Trash2,
-  Calendar
+  Calendar,
+  Clock
 } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import VideoPlayer from '@/components/video/VideoPlayer';
@@ -17,6 +17,13 @@ import VideoCard from '@/components/video/VideoCard';
 import CommentSection from '@/components/video/CommentSection';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
 import { mockComments, formatViews, formatDate, Video } from '@/lib/mockData';
@@ -391,18 +398,82 @@ const Watch = () => {
                   </Button>
                 </div>
 
-                <Button variant="secondary" className="gap-2 rounded-full font-semibold border border-border/50 hover:bg-accent shrink-0 text-sm">
+                <Button
+                  variant="secondary"
+                  className="gap-2 rounded-full font-semibold border border-border/50 hover:bg-accent shrink-0 text-sm"
+                  onClick={() => {
+                    const url = window.location.href;
+                    navigator.clipboard.writeText(url).then(() => {
+                      toast({ title: 'Link Copied', description: 'Video link has been copied to your clipboard.' });
+                    }).catch(() => {
+                      // Fallback for older browsers
+                      const input = document.createElement('input');
+                      input.value = url;
+                      document.body.appendChild(input);
+                      input.select();
+                      document.execCommand('copy');
+                      document.body.removeChild(input);
+                      toast({ title: 'Link Copied', description: 'Video link has been copied to your clipboard.' });
+                    });
+                  }}
+                >
                   <Share2 className="h-4 w-4 xl:h-5 xl:w-5" />
                   <span className="hidden sm:inline">Share</span>
                 </Button>
 
-                <Button variant="secondary" size="icon" className="rounded-full border border-border/50 hover:bg-accent shrink-0">
-                  <Download className="h-4 w-4 xl:h-5 xl:w-5" />
-                </Button>
 
-                <Button variant="secondary" size="icon" className="rounded-full border border-border/50 hover:bg-accent shrink-0">
-                  <MoreHorizontal className="h-4 w-4 xl:h-5 xl:w-5" />
-                </Button>
+
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" size="icon" className="rounded-full border border-border/50 hover:bg-accent shrink-0">
+                      <MoreHorizontal className="h-4 w-4 xl:h-5 xl:w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-48 border-0"
+                    style={{
+                      background: 'hsl(20 8% 9%)',
+                      border: '1px solid hsl(20 6% 18%)',
+                      boxShadow: '0 16px 48px hsl(20 8% 3% / 0.8)',
+                    }}
+                  >
+                    <DropdownMenuItem
+                      className="cursor-pointer gap-3 font-medium hover:bg-accent focus:bg-accent py-2.5"
+                      onClick={() => {
+                        if (!video) return;
+                        const WATCH_LATER_KEY = 'crevault_watch_later';
+                        try {
+                          const stored = localStorage.getItem(WATCH_LATER_KEY);
+                          const ids: string[] = stored ? JSON.parse(stored) : [];
+                          if (ids.includes(video.id)) {
+                            toast({ title: 'Already Saved', description: 'This video is already in your Watch Later list.' });
+                          } else {
+                            ids.push(video.id);
+                            localStorage.setItem(WATCH_LATER_KEY, JSON.stringify(ids));
+                            toast({ title: 'Saved to Watch Later', description: 'You can find it in your Watch Later list.' });
+                          }
+                        } catch {
+                          toast({ title: 'Error', description: 'Could not save to Watch Later.', variant: 'destructive' });
+                        }
+                      }}
+                    >
+                      <Clock className="h-4 w-4 text-accent" />
+                      Watch Later
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator style={{ background: 'hsl(20 6% 16%)' }} />
+                    <DropdownMenuItem
+                      className="cursor-pointer gap-3 font-medium hover:bg-accent focus:bg-accent py-2.5"
+                      onClick={() => {
+                        toast({ title: 'Video Reported', description: 'Thank you for helping keep the vault safe. We will review this content.' });
+                      }}
+                    >
+                      <Flag className="h-4 w-4 text-destructive" />
+                      Report
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 

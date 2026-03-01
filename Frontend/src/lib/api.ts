@@ -8,7 +8,7 @@ export interface ApiVideo {
   category?: string;
   thumbnailUrl?: string;
   videoUrl: string;
-  duration?: string;
+  duration?: number;  // stored in seconds on the backend
   views?: number;
   likes?: number;
   dislikes?: number;
@@ -25,6 +25,18 @@ export interface ApiVideo {
 /** Base URL for API. In dev with Vite proxy use '' so /api goes to backend. */
 export function getApiBase(): string {
   return import.meta.env.VITE_API_URL ?? '';
+}
+
+/** Format seconds → "m:ss" or "h:mm:ss". Returns '' if 0 or falsy. */
+function formatDuration(seconds?: number): string {
+  if (!seconds || seconds <= 0) return '';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  if (h > 0) {
+    return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+  return `${m}:${String(s).padStart(2, '0')}`;
 }
 
 /** Map backend video to frontend Video type. */
@@ -55,7 +67,7 @@ export function mapApiVideoToVideo(api: ApiVideo, baseUrl: string = getApiBase()
     description: api.description ?? '',
     thumbnail,
     videoUrl,
-    duration: api.duration ?? '0:00',
+    duration: formatDuration(api.duration),
     views: api.views ?? 0,
     likes: api.likes ?? 0,
     dislikes: api.dislikes ?? 0,
