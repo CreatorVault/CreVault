@@ -45,7 +45,7 @@ const PATRON_THRESHOLD = 2000;
 const EARNINGS_RATE = 0.40; // ₹ per view
 
 const Dashboard = () => {
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const { toast } = useToast();
     const navigate = useNavigate();
 
@@ -60,12 +60,13 @@ const Dashboard = () => {
     const patronProgress = Math.min((patronCount / PATRON_THRESHOLD) * 100, 100);
 
     useEffect(() => {
+        if (isLoading) return; // wait until auth state is confirmed from localStorage
         if (!isAuthenticated) {
             navigate('/login');
             return;
         }
         fetchStats();
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, isLoading, navigate]);
 
     const fetchStats = async (isRefresh = false) => {
         if (isRefresh) setRefreshing(true);

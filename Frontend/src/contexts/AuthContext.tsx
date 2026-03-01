@@ -5,6 +5,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   signup: (username: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
@@ -13,11 +14,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(() => {
     try {
       const stored = localStorage.getItem('streamtube_user');
-      if (stored) return JSON.parse(stored) as User;
+      if (stored) {
+        const parsed = JSON.parse(stored) as User;
+        // Defer isLoading = false to after first render
+        setTimeout(() => setIsLoading(false), 0);
+        return parsed;
+      }
     } catch { }
+    setTimeout(() => setIsLoading(false), 0);
     return null;
   });
 
@@ -103,6 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAuthenticated: !!user,
         isAdmin: user?.role === 'admin',
+        isLoading,
         login,
         signup,
         logout,
