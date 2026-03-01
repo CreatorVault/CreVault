@@ -18,9 +18,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
         // Vercel Serverless Functions do not support persistent Socket.IO connections.
-        // We disable the socket connection if we detect we are on a Vercel backend to prevent 404 errors.
+        // Skip socket connection on Vercel to prevent 404 errors.
         if (socketUrl.includes('vercel.app')) {
-            console.warn('Real-time features (Socket.IO) are disabled on Vercel Serverless deployment.');
             return;
         }
 
