@@ -43,8 +43,8 @@ const Signup = () => {
     setIsLoading(true);
 
     try {
-      const success = await signup(email, password, username);
-      if (success) {
+      const result = await signup(username, email, password);
+      if (result === true) {
         toast({
           title: 'Account created!',
           description: 'Welcome to CreVault.',
@@ -53,7 +53,7 @@ const Signup = () => {
       } else {
         toast({
           title: 'Signup failed',
-          description: 'Email or username already exists. Please try again.',
+          description: typeof result === 'string' ? result : 'Email or username already exists. Please try again.',
           variant: 'destructive',
         });
       }

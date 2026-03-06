@@ -122,9 +122,9 @@ const Login = () => {
                 <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Password
                 </Label>
-                <Button variant="link" className="h-auto p-0 text-xs font-semibold text-primary/80 hover:text-primary">
+                {/* <Button variant="link" className="h-auto p-0 text-xs font-semibold text-primary/80 hover:text-primary">
                   Forgot?
-                </Button>
+                </Button> */}
               </div>
               <div className="ember-input relative rounded-xl transition-all duration-300">
                 <Input
