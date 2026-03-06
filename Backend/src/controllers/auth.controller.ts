@@ -19,11 +19,18 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Check existing user
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      console.log("User already exists:", email);
-      return res.status(400).json({ message: "User already exists" });
+    // Check existing email
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      console.log("Email already in use:", email);
+      return res.status(400).json({ message: "Email already in use" });
+    }
+
+    // Check existing username
+    const existingName = await User.findOne({ name });
+    if (existingName) {
+      console.log("Username already taken:", name);
+      return res.status(400).json({ message: "Username already taken" });
     }
 
     // Hash password

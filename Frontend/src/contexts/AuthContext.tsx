@@ -7,7 +7,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (username: string, email: string, password: string) => Promise<boolean>;
+  signup: (username: string, email: string, password: string) => Promise<boolean | string>;
   logout: () => void;
 }
 
@@ -64,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const signup = useCallback(async (username: string, email: string, password: string): Promise<boolean> => {
+  const signup = useCallback(async (username: string, email: string, password: string): Promise<boolean | string> => {
     try {
       const apiBase = import.meta.env.VITE_API_URL || '';
       const response = await fetch(`${apiBase}/api/auth/register`, {
@@ -92,10 +92,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true;
       }
 
-      return false;
+      // Return the specific error message from the backend
+      const errorData = await response.json();
+      return errorData.message || 'Signup failed';
     } catch (error) {
       console.error('Signup error:', error);
-      return false;
+      return 'Something went wrong. Please try again.';
     }
   }, []);
 
