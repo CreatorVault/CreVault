@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
 import videoRoutes from "./routes/video.routes";
 import userRoutes from "./routes/user.routes";
+import commentRoutes from "./routes/comment.routes";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use("/api/auth", authRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/comments", commentRoutes);
 
 app.get("/", (_req, res) => {
   res.send("API is running");

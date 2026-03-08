@@ -333,3 +333,62 @@ export async function getLikedVideos(): Promise<Video[]> {
   const apiBase = base || (typeof window !== 'undefined' ? window.location.origin : '');
   return data.map((v) => mapApiVideoToVideo(v, apiBase));
 }
+
+/** Comment shape returned by the backend. */
+export interface ApiComment {
+  id: string;
+  videoId: string;
+  userId: string;
+  username: string;
+  avatar: string;
+  content: string;
+  createdAt: string;
+  likes: number;
+}
+
+/** Fetch all comments for a video. */
+export async function getComments(videoId: string): Promise<ApiComment[]> {
+  const base = getApiBase();
+  const url = base ? `${base}/api/comments/${videoId}` : `/api/comments/${videoId}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch comments: ${res.status}`);
+  }
+  return await res.json();
+}
+
+/** Add a comment to a video (requires auth). */
+export async function addCommentApi(videoId: string, content: string): Promise<ApiComment> {
+  const base = getApiBase();
+  const url = base ? `${base}/api/comments/${videoId}` : `/api/comments/${videoId}`;
+  const token = getAuthToken();
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to add comment: ${res.status}`);
+  }
+  return await res.json();
+}
+
+/** Delete a comment (requires auth, must be owner). */
+export async function deleteCommentApi(commentId: string): Promise<void> {
+  const base = getApiBase();
+  const url = base ? `${base}/api/comments/${commentId}` : `/api/comments/${commentId}`;
+  const token = getAuthToken();
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to delete comment: ${res.status}`);
+  }
+}
+

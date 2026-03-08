@@ -23,23 +23,52 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             return;
         }
 
-        const socketInstance = io(socketUrl, {
-            // autoConnect: true,
-            // transports: ["websocket"] 
-        });
+        // First check if the backend is reachable before attempting Socket.IO
+        fetch(`${socketUrl}/`, { method: 'GET', signal: AbortSignal.timeout(3000) })
+            .then(() => {
+                const socketInstance = io(socketUrl, {
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000,
+                    reconnectionDelayMax: 5000,
+                    timeout: 5000,
+                    transports: ['websocket', 'polling'],
+                });
 
-        socketInstance.on('connect', () => {
-            setIsConnected(true);
-        });
+                socketInstance.on('connect', () => {
+                    setIsConnected(true);
+                });
 
-        socketInstance.on('disconnect', () => {
-            setIsConnected(false);
-        });
+                socketInstance.on('disconnect', () => {
+                    setIsConnected(false);
+                });
 
-        setSocket(socketInstance);
+                // Suppress connection errors from appearing in console
+                socketInstance.on('connect_error', () => {
+                    setIsConnected(false);
+                });
+
+                socketInstance.io.on('reconnect_failed', () => {
+                    setIsConnected(false);
+                });
+
+                setSocket(socketInstance);
+
+                // Cleanup on unmount
+                return () => {
+                    socketInstance.disconnect();
+                };
+            })
+            .catch(() => {
+                // Backend not reachable — skip Socket.IO entirely, no console errors
+                setIsConnected(false);
+            });
 
         return () => {
-            socketInstance.disconnect();
+            // If socket was created, disconnect it
+            setSocket((prev) => {
+                if (prev) prev.disconnect();
+                return null;
+            });
         };
     }, []);
 
