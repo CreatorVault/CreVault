@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSocket } from '@/contexts/SocketContext';
-import { mockComments, formatViews, formatDate, Video } from '@/lib/mockData';
+import { formatViews, formatDate, Video } from '@/lib/mockData';
 import {
   getVideo,
   getVideos,
@@ -160,7 +160,7 @@ const Watch = () => {
       .catch(() => setUserReaction(null));
   }, [videoId, isAuthenticated]);
 
-  const videoComments = mockComments.filter(c => c.videoId === videoId);
+
 
   const handleViewStart = () => {
     if (!video || hasRecordedView) return;
@@ -512,7 +512,7 @@ const Watch = () => {
             </div>
 
             {/* Comments */}
-            <CommentSection comments={videoComments} videoId={video.id} />
+            <CommentSection videoId={video.id} socket={socket} />
           </div>
         </div>
 
