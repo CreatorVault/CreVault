@@ -165,7 +165,6 @@ const Watch = () => {
   const handleViewStart = () => {
     if (!video || hasRecordedView) return;
     setHasRecordedView(true);
-    setViews(prev => prev + 1);
 
     incrementVideoView(video.id)
       .then((updated) => {
@@ -308,10 +307,10 @@ const Watch = () => {
             </h1>
 
             {/* Stats and actions */}
-            <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4 flex-wrap">
-                <Link to={`/profile/${video.author.id}`} className="flex items-center gap-3 group shrink-0">
-                  <Avatar className="h-11 w-11 avatar-ring transition-transform group-hover:scale-105">
+            <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <Link to={`/profile/${video.author.id}`} className="flex items-center gap-3 group shrink-0 min-w-0">
+                  <Avatar className="h-11 w-11 avatar-ring transition-transform group-hover:scale-105 shrink-0">
                     <AvatarFallback
                       className="text-base font-bold"
                       style={{
@@ -322,32 +321,34 @@ const Watch = () => {
                       {video.author.username.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col">
-                    <p className="font-bold text-foreground group-hover:text-primary transition-colors text-sm sm:text-base">
+                  <div className="flex flex-col min-w-0 truncate">
+                    <p className="font-bold text-foreground group-hover:text-primary transition-colors text-sm sm:text-base truncate">
                       {video.author.username}
                     </p>
-                    <p className="text-xs font-semibold text-muted-foreground">
+                    <p className="text-xs font-semibold text-muted-foreground truncate">
                       {formatViews(subscribers)} patrons
                     </p>
                   </div>
                 </Link>
 
-                <Button
-                  onClick={handleSubscribe}
-                  className={cn(
-                    'rounded-full px-6 font-bold tracking-wide transition-all duration-300',
-                    isSubscribed
-                      ? 'bg-secondary text-foreground hover:bg-secondary border border-border/50 hover:border-border'
-                      : 'bg-foreground text-background hover:bg-foreground/90 hover:scale-105 hover:shadow-[0_0_20px_hsl(35_30%_92%/0.2)]'
-                  )}
-                >
-                  {isSubscribed ? 'Patronizing' : 'Patron'}
-                </Button>
+                {!isOwner && (
+                  <Button
+                    onClick={handleSubscribe}
+                    className={cn(
+                      'rounded-full px-5 sm:px-6 font-bold tracking-wide transition-all duration-300 ml-auto',
+                      isSubscribed
+                        ? 'bg-secondary text-foreground hover:bg-secondary border border-border/50 hover:border-border'
+                        : 'bg-foreground text-background hover:bg-foreground/90 hover:scale-105 hover:shadow-[0_0_20px_hsl(35_30%_92%/0.2)]'
+                    )}
+                  >
+                    {isSubscribed ? 'Patronizing' : 'Patron'}
+                  </Button>
+                )}
 
                 {isOwner && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm" className="gap-2 rounded-full font-bold ml-auto sm:ml-0 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                      <Button variant="destructive" size="sm" className="gap-2 rounded-full font-bold ml-auto bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground">
                         <Trash2 className="h-4 w-4" />
                         <span className="hidden sm:inline">Delete</span>
                       </Button>
@@ -371,7 +372,7 @@ const Watch = () => {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide shrink-0">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide shrink-0 sm:ml-auto w-full sm:w-auto mt-2 sm:mt-0">
                 {/* Like/Dislike */}
                 <div className="flex items-center overflow-hidden rounded-full bg-secondary border border-border/50 shrink-0">
                   <Button

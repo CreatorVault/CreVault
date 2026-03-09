@@ -168,12 +168,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
       {/* Controls */}
       <div
         className={cn(
-          'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent px-4 pb-4 pt-16 transition-opacity duration-300',
+          'absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent px-3 sm:px-4 pb-3 sm:pb-4 pt-16 transition-opacity duration-300',
           showControls ? 'opacity-100' : 'opacity-0'
         )}
       >
         {/* Progress bar */}
-        <div className="mb-2">
+        <div className="mb-2 w-full">
           <Slider
             value={[currentTime]}
             max={duration || 100}
@@ -195,7 +195,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
               {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 fill-current" />}
             </Button>
 
-            <div className="group/volume flex items-center">
+            <div className="group/volume hidden sm:flex items-center">
               <Button
                 variant="ghost"
                 size="icon"

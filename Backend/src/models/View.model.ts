@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IView extends Document {
-    user: mongoose.Types.ObjectId;
+    user?: mongoose.Types.ObjectId | null;
     video: mongoose.Types.ObjectId;
     createdAt: Date;
 }
@@ -11,7 +11,7 @@ const ViewSchema: Schema = new Schema(
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true,
+            default: null,
         },
         video: {
             type: mongoose.Schema.Types.ObjectId,

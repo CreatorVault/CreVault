@@ -100,8 +100,8 @@ const Profile = () => {
         />
 
         {/* Profile header */}
-        <div className="relative -mt-16 sm:-mt-20 flex flex-col items-start gap-4 px-4 sm:flex-row sm:items-end sm:px-6 mb-8">
-          <Avatar className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl border-4" style={{ borderColor: 'hsl(20 8% 5%)', boxShadow: '0 0 30px hsl(18 90% 48% / 0.3)' }}>
+        <div className="relative -mt-16 sm:-mt-20 flex flex-col items-center sm:items-end gap-x-6 gap-y-4 px-4 sm:flex-row sm:px-6 mb-8 text-center sm:text-left">
+          <Avatar className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl border-4 shrink-0 mx-auto sm:mx-0" style={{ borderColor: 'hsl(20 8% 5%)', boxShadow: '0 0 30px hsl(18 90% 48% / 0.3)' }}>
             <AvatarFallback
               className="text-4xl sm:text-5xl font-bold rounded-2xl text-[hsl(20_8%_5%)]"
               style={{ background: 'linear-gradient(135deg, hsl(43 85% 60%) 0%, hsl(18 90% 48%) 100%)' }}
@@ -110,12 +110,12 @@ const Profile = () => {
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between w-full pt-2 sm:pt-0">
+          <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between w-full">
             <div>
               <h1 className="text-2xl font-bold text-foreground sm:text-4xl tracking-tight mb-2">
                 {profileUser.name}
               </h1>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground font-medium">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-2 text-sm text-muted-foreground font-medium w-full max-w-2xl mx-auto sm:mx-0">
                 <span className="flex items-center gap-1.5 text-foreground">
                   <span className="text-primary font-bold">{formatViews(profileUser.subscribers)}</span> patrons
                 </span>
@@ -193,7 +193,7 @@ const Profile = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="videos" className="mt-4 px-2 sm:px-0">
-          <TabsList className="h-14 w-full justify-start gap-4 sm:gap-8 rounded-none border-b border-border bg-transparent p-0 overflow-x-auto scrollbar-hide">
+          <TabsList className="h-auto min-h-[56px] w-full justify-start gap-4 sm:gap-8 rounded-none border-b border-border bg-transparent p-0 overflow-x-auto scrollbar-hide py-1">
             <TabsTrigger
               value="videos"
               className="h-14 rounded-none border-b-2 border-transparent px-2 sm:px-4 text-base font-bold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
