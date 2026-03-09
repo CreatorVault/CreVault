@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import VideoCard from '@/components/video/VideoCard';
 import type { Video } from '@/lib/mockData';
@@ -8,11 +8,13 @@ import { Search } from 'lucide-react';
 
 const Home = () => {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const searchQuery = searchParams.get('search') || '';
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Re-fetch videos every time Home is navigated to (location.key changes on each navigation)
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -30,7 +32,7 @@ const Home = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.key]);
 
   const filteredVideos = useMemo(() => {
     let list = videos;

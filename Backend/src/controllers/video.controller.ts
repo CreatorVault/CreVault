@@ -8,6 +8,31 @@ import User from "../models/User.model";
 
 import cloudinary from "../config/cloudinary";
 
+/** Recount views from the View collection for given video IDs and sync to Video docs.
+ *  Takes the MAX of the existing counter and the View-document count so that
+ *  older anonymous views (counted before View docs were created) are never lost. */
+async function recountViews(videos: any[]) {
+  const videoIds = videos.map((v) => v._id);
+  const viewCounts = await View.aggregate([
+    { $match: { video: { $in: videoIds } } },
+    { $group: { _id: "$video", count: { $sum: 1 } } },
+  ]);
+  const viewMap: Record<string, number> = {};
+  for (const vc of viewCounts) {
+    viewMap[vc._id.toString()] = vc.count;
+  }
+  for (const video of videos) {
+    const key = video._id.toString();
+    const docCount = viewMap[key] || 0;
+    // Use whichever is higher: the stored counter or the document count
+    const bestViews = Math.max(video.views || 0, docCount);
+    if (video.views !== bestViews) {
+      video.views = bestViews;
+      await video.save();
+    }
+  }
+}
+
 const getIO = (req: Request) => {
   const io = req.app.get("io");
   if (!io) {
@@ -105,6 +130,9 @@ export const getAllVideos = async (_req: Request, res: Response) => {
       })
     );
 
+    // Recount views from View collection
+    await recountViews(updatedVideos);
+
     res.json(updatedVideos);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -124,6 +152,9 @@ export const getVideoById = async (req: Request, res: Response) => {
       video.dislikes = dislikesCount;
       await video.save();
     }
+
+    // Recount views from View collection
+    await recountViews([video]);
 
     res.json(video);
   } catch (error) {
@@ -154,12 +185,15 @@ export const incrementViews = async (req: Request, res: Response) => {
         shouldIncrement = true;
       }
     } else {
-      // Anonymous view – always count
+      // Anonymous view – also store in View collection (with user: null)
+      await View.create({ user: null, video: videoId });
       shouldIncrement = true;
     }
 
     if (shouldIncrement) {
-      video.views += 1;
+      // Recount from View collection, but never go below existing counter
+      const docCount = await View.countDocuments({ video: videoId });
+      video.views = Math.max(video.views || 0, docCount);
       await video.save();
       getIO(req).to(`video_${videoId}`).emit("view_updated", { views: video.views });
     }
@@ -311,6 +345,9 @@ export const getDashboardStats = async (req: Request, res: Response) => {
         await video.save();
       }
     }
+
+    // Recount views from View collection
+    await recountViews(videos);
 
     const totalVideos = videos.length;
     const totalViews = videos.reduce((acc, curr) => acc + (curr.views || 0), 0);
