@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   signup: (username: string, email: string, password: string) => Promise<boolean | string>;
   logout: () => void;
+  updateUser: (updates: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -106,6 +107,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('streamtube_user');
   }, []);
 
+  const updateUser = useCallback((updates: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updates };
+      localStorage.setItem('streamtube_user', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
 
   return (
     <AuthContext.Provider
@@ -117,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         signup,
         logout,
+        updateUser,
       }}
     >
       {children}
