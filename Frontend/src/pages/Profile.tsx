@@ -15,7 +15,7 @@ import { updateProfilePhoto as updateProfilePhotoApi } from '@/lib/api';
 
 const Profile = () => {
   const { userId } = useParams<{ userId: string }>();
-  const { user: currentUser, updateUser } = useAuth();
+  const { user: currentUser, isAuthenticated, updateUser } = useAuth();
   const { toast } = useToast();
 
   const [profileUser, setProfileUser] = useState<ApiUserProfile | null>(null);
@@ -67,8 +67,8 @@ const Profile = () => {
       setPhotoUploading(true);
       const updatedProfile = await updateProfilePhotoApi(file);
       setProfileUser(updatedProfile);
-
-      // Update global auth user state to sync with Navbar (Header)
+      
+      // Update global auth state if it's our own profile
       if (updatedProfile.profilePhotoUrl) {
         updateUser({ avatar: updatedProfile.profilePhotoUrl });
       }

@@ -108,7 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const updateUser = useCallback((updates: Partial<User>) => {
-    setUser(prev => {
+    setUser((prev) => {
       if (!prev) return null;
       const updated = { ...prev, ...updates };
       localStorage.setItem('streamtube_user', JSON.stringify(updated));
