@@ -89,4 +89,43 @@ export function handleVideoUpload(req: Request, res: Response, next: NextFunctio
   });
 }
 
+/**
+ * Middleware: accept "profilePhoto", upload to Cloudinary,
+ * then put the URL on the request.
+ */
+export function handleProfilePhotoUpload(req: Request, res: Response, next: NextFunction) {
+  const singleUpload = upload.single("profilePhoto");
+
+  singleUpload(req, res, async (err: any) => {
+    if (err) {
+      console.error("Multer upload error:", err);
+      if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({ message: "File too large. Max 100 MB." });
+        }
+        return res.status(400).json({ message: `Upload error: ${err.message}` });
+      }
+      return res.status(400).json({ message: err.message || "Upload failed" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No profile photo file provided" });
+    }
+
+    try {
+      const result = await uploadToCloudinary(req.file.buffer, {
+        folder: "profile_photos",
+        resource_type: "image",
+      });
+      (req as any).profilePhotoUrl = result.secure_url;
+      next();
+    } catch (uploadErr: any) {
+      console.error("Cloudinary upload error:", uploadErr);
+      return res.status(500).json({
+        message: uploadErr.message || "Failed to upload to cloud storage",
+      });
+    }
+  });
+}
+
 export default upload;

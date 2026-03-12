@@ -17,6 +17,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
             name: user.name,
             email: user.email,
             subscribers: user.subscribers || 0,
+            profilePhotoUrl: user.profilePhotoUrl,
             createdAt: (user as any).createdAt,
         });
     } catch (error) {
@@ -45,6 +46,42 @@ export const getUserVideos = async (req: Request, res: Response) => {
         res.json(videos);
     } catch (error) {
         console.error("Get user videos error:", error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+/**
+ * UPDATE USER PROFILE PHOTO
+ */
+export const updateProfilePhoto = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.id;
+        const profilePhotoUrl = (req as any).profilePhotoUrl;
+
+        if (!profilePhotoUrl) {
+            return res.status(400).json({ message: "No profile photo URL provided" });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { profilePhotoUrl },
+            { new: true }
+        ).select("-password");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.json({
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            subscribers: user.subscribers || 0,
+            profilePhotoUrl: user.profilePhotoUrl,
+            createdAt: (user as any).createdAt,
+        });
+    } catch (error) {
+        console.error("Update profile photo error:", error);
         res.status(500).json({ message: "Server error" });
     }
 };

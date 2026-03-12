@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Calendar, Users, Video as VideoIcon, Settings, Eye, ThumbsUp } from 'lucide-react';
+import { Calendar, Users, Video as VideoIcon, Settings, Eye, ThumbsUp, Camera } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import VideoCard from '@/components/video/VideoCard';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { getUserProfile, getUserVideos, ApiUserProfile } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { updateProfilePhoto as updateProfilePhotoApi } from '@/lib/api';
 
 const Profile = () => {
   const { userId } = useParams<{ userId: string }>();
@@ -20,6 +21,7 @@ const Profile = () => {
   const [profileUser, setProfileUser] = useState<ApiUserProfile | null>(null);
   const [userVideos, setUserVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const [photoUploading, setPhotoUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isOwnProfile = currentUser?.id === userId;
@@ -56,6 +58,29 @@ const Profile = () => {
       cancelled = true;
     };
   }, [userId]);
+  
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setPhotoUploading(true);
+      const updatedProfile = await updateProfilePhotoApi(file);
+      setProfileUser(updatedProfile);
+      toast({
+        title: "Success",
+        description: "Profile photo updated successfully",
+      });
+    } catch (err) {
+      toast({
+        title: "Upload Failed",
+        description: err instanceof Error ? err.message : "Failed to update profile photo",
+        variant: "destructive",
+      });
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
 
   const totalViews = userVideos.reduce((acc, v) => acc + (v.views || 0), 0);
   const totalLikes = userVideos.reduce((acc, v) => acc + (v.likes || 0), 0);
@@ -101,14 +126,38 @@ const Profile = () => {
 
         {/* Profile header */}
         <div className="relative -mt-16 sm:-mt-20 flex flex-col items-center sm:items-end gap-x-6 gap-y-4 px-4 sm:flex-row sm:px-6 mb-8 text-center sm:text-left">
-          <Avatar className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl border-4 shrink-0 mx-auto sm:mx-0" style={{ borderColor: 'hsl(20 8% 5%)', boxShadow: '0 0 30px hsl(18 90% 48% / 0.3)' }}>
-            <AvatarFallback
-              className="text-4xl sm:text-5xl font-bold rounded-2xl text-[hsl(20_8%_5%)]"
-              style={{ background: 'linear-gradient(135deg, hsl(43 85% 60%) 0%, hsl(18 90% 48%) 100%)' }}
-            >
-              {profileUser.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative group shrink-0 mx-auto sm:mx-0">
+            <Avatar className="h-28 w-28 sm:h-36 sm:w-36 rounded-2xl border-4" style={{ borderColor: 'hsl(20 8% 5%)', boxShadow: '0 0 30px hsl(18 90% 48% / 0.3)' }}>
+              {profileUser.profilePhotoUrl ? (
+                <img 
+                  src={profileUser.profilePhotoUrl} 
+                  alt={profileUser.name} 
+                  className="h-full w-full object-cover rounded-2xl" 
+                />
+              ) : (
+                <AvatarFallback
+                  className="text-4xl sm:text-5xl font-bold rounded-2xl text-[hsl(20_8%_5%)]"
+                  style={{ background: 'linear-gradient(135deg, hsl(43 85% 60%) 0%, hsl(18 90% 48%) 100%)' }}
+                >
+                  {profileUser.name.charAt(0)}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            
+            {isOwnProfile && (
+              <label className={cn(
+                "absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl cursor-pointer transition-opacity opacity-0 group-hover:opacity-100",
+                photoUploading && "opacity-100"
+              )}>
+                {photoUploading ? (
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                ) : (
+                  <Camera className="h-8 w-8 text-white" />
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} disabled={photoUploading} />
+              </label>
+            )}
+          </div>
 
           <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-end sm:justify-between w-full">
             <div>
