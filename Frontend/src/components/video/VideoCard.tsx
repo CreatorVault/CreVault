@@ -52,15 +52,19 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <Avatar className="h-6 w-6 avatar-ring">
-              <AvatarFallback
-                className="text-[10px] font-bold"
-                style={{
-                  background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
-                  color: 'hsl(20 8% 5%)',
-                }}
-              >
-                {video.author.username.charAt(0)}
-              </AvatarFallback>
+              {video.author.avatar ? (
+                <AvatarImage src={video.author.avatar} alt={video.author.username} />
+              ) : (
+                <AvatarFallback
+                  className="text-[10px] font-bold"
+                  style={{
+                    background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
+                    color: 'hsl(20 8% 5%)',
+                  }}
+                >
+                  {video.author.username.charAt(0)}
+                </AvatarFallback>
+              )}
             </Avatar>
             <span className="font-medium">{video.author.username}</span>
           </Link>
@@ -114,15 +118,19 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, layout = 'grid' }) => {
           className="shrink-0 pt-0.5"
         >
           <Avatar className="h-9 w-9 transition-transform duration-200 hover:scale-110 avatar-ring">
-            <AvatarFallback
-              className="text-sm font-bold"
-              style={{
-                background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
-                color: 'hsl(20 8% 5%)',
-              }}
-            >
-              {video.author.username.charAt(0)}
-            </AvatarFallback>
+            {video.author.avatar ? (
+              <AvatarImage src={video.author.avatar} alt={video.author.username} />
+            ) : (
+              <AvatarFallback
+                className="text-sm font-bold"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(18 90% 48%) 0%, hsl(43 85% 60%) 100%)',
+                  color: 'hsl(20 8% 5%)',
+                }}
+              >
+                {video.author.username.charAt(0)}
+              </AvatarFallback>
+            )}
           </Avatar>
         </Link>
 

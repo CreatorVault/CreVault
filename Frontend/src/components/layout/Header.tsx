@@ -173,6 +173,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-9 w-9 rounded-full ml-1 sm:ml-0 p-0">
                       <Avatar className="h-9 w-9 avatar-ring">
+                        {user?.avatar && <AvatarImage src={user.avatar} alt={user.username} />}
                         <AvatarFallback
                           className="text-sm font-bold"
                           style={{
@@ -196,6 +197,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
                   >
                     <div className="flex items-center gap-3 p-3">
                       <Avatar className="h-10 w-10 avatar-ring">
+                        {user?.avatar && <AvatarImage src={user.avatar} alt={user.username} />}
                         <AvatarFallback
                           className="text-sm font-bold"
                           style={{

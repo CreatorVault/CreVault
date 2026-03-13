@@ -46,12 +46,14 @@ export function mapApiVideoToVideo(api: ApiVideo, baseUrl: string = getApiBase()
   let authorName = 'Unknown';
   let authorEmail = '';
   let authorSubscribers = 0;
+  let authorAvatar = '';
 
   if (api.user && typeof api.user === 'object') {
     authorId = api.user._id;
     authorName = api.user.name || 'Unknown';
     authorEmail = api.user.email || '';
     authorSubscribers = api.user.subscribers ?? 0;
+    authorAvatar = (api.user as any).profilePhotoUrl || '';
   } else if (typeof api.user === 'string') {
     authorId = api.user;
   }
@@ -76,7 +78,7 @@ export function mapApiVideoToVideo(api: ApiVideo, baseUrl: string = getApiBase()
       id: authorId,
       username: authorName,
       email: authorEmail,
-      avatar: '',
+      avatar: authorAvatar,
       role: 'user',
       createdAt: '',
       subscribers: authorSubscribers,
@@ -289,6 +291,7 @@ export interface ApiUserProfile {
   name: string;
   email: string;
   subscribers: number;
+  profilePhotoUrl?: string;
   createdAt: string;
 }
 
@@ -315,6 +318,32 @@ export async function getUserVideos(userId: string): Promise<Video[]> {
   const data: ApiVideo[] = await res.json();
   const apiBase = base || (typeof window !== 'undefined' ? window.location.origin : '');
   return data.map((v) => mapApiVideoToVideo(v, apiBase));
+}
+
+/** Update the current user's profile photo (requires auth). */
+export async function updateProfilePhoto(file: File): Promise<ApiUserProfile> {
+  const base = getApiBase();
+  const url = `${base}/api/users/profile-photo`;
+  const token = getAuthToken();
+  if (!token) throw new Error("UNAUTHORIZED");
+
+  const formData = new FormData();
+  formData.append('profilePhoto', file);
+
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || `Failed to update profile photo: ${res.status}`);
+  }
+
+  return await res.json();
 }
 
 /** Fetch all videos the current user has liked (requires auth). */
