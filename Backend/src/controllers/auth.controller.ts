@@ -8,28 +8,36 @@ import generateToken from "../utils/generateToken";
  */
 export const register = async (req: Request, res: Response) => {
   try {
-    console.log("=== REGISTER REQUEST ===");
-    console.log("Body:", req.body);
-
     const { name, email, password } = req.body;
 
     // Validation
     if (!name || !email || !password) {
-      console.log("Missing fields:", { name: !!name, email: !!email, password: !!password });
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    // Input length validation
+    if (name.length > 50) {
+      return res.status(400).json({ message: "Name must be less than 50 characters" });
+    }
+    if (password.length < 8 || password.length > 128) {
+      return res.status(400).json({ message: "Password must be between 8 and 128 characters" });
     }
 
     // Check existing email
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
-      console.log("Email already in use:", email);
       return res.status(400).json({ message: "Email already in use" });
     }
 
     // Check existing username
     const existingName = await User.findOne({ name });
     if (existingName) {
-      console.log("Username already taken:", name);
       return res.status(400).json({ message: "Username already taken" });
     }
 
@@ -42,8 +50,6 @@ export const register = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
     });
-
-    console.log("User created successfully:", user._id);
 
     // Generate token
     const token = generateToken(user._id.toString());
@@ -68,39 +74,27 @@ export const register = async (req: Request, res: Response) => {
  */
 export const login = async (req: Request, res: Response) => {
   try {
-    console.log("=== LOGIN REQUEST ===");
-    console.log("Body:", req.body);
-
     const { email, password } = req.body;
 
     // Validation
     if (!email || !password) {
-      console.log("Missing fields:", { email: !!email, password: !!password });
       return res.status(400).json({ message: "All fields are required" });
     }
 
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("User not found:", email);
       return res.status(401).json({ message: "Invalid credentials" });
     }
-
-    console.log("User found:", user._id);
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("Password mismatch for user:", email);
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    console.log("Password matched, generating token");
-
     // Generate token
     const token = generateToken(user._id.toString());
-
-    console.log("Login successful for user:", email);
 
     res.status(200).json({
       message: "Login successful",

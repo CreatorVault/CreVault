@@ -1,8 +1,14 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, Settings } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, Settings, RotateCcw, RotateCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface VideoPlayerProps {
   src: string;
@@ -19,9 +25,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
   const [volume, setVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [showControls, setShowControls] = useState(true);
   const [viewCounted, setViewCounted] = useState(false);
+  const [skipTime, setSkipTime] = useState<{ direction: 'forward' | 'backward', key: number } | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastClickTimeRef = useRef(0);
 
   const onViewStartRef = useRef(onViewStart);
   onViewStartRef.current = onViewStart;
@@ -96,6 +105,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
     }
   };
 
+  const handlePlaybackSpeedChange = (speed: number) => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+      setPlaybackSpeed(speed);
+    }
+  };
+
   const handleSeek = (value: number[]) => {
     if (videoRef.current) {
       videoRef.current.currentTime = value[0];
@@ -112,6 +128,87 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
       }
     }
   };
+
+  const skip = (seconds: number) => {
+    if (videoRef.current) {
+      const newTime = videoRef.current.currentTime + seconds;
+      videoRef.current.currentTime = Math.max(0, Math.min(videoRef.current.duration, newTime));
+      setCurrentTime(videoRef.current.currentTime);
+      
+      // Visual feedback
+      setSkipTime({ 
+        direction: seconds > 0 ? 'forward' : 'backward', 
+        key: Date.now() 
+      });
+      
+      setTimeout(() => setSkipTime(null), 500);
+    }
+  };
+
+  const handleVideoClick = (e: React.MouseEvent) => {
+    const time = Date.now();
+    const delay = time - lastClickTimeRef.current;
+    
+    if (delay < 300) {
+      // Double click - skip
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      
+      // Determine side (1/3 for left, 1/3 for right, middle for play/pause)
+      if (x < rect.width / 3) {
+        skip(-10);
+      } else if (x > (rect.width * 2) / 3) {
+        skip(10);
+      } else {
+        togglePlay();
+      }
+    } else {
+      // Standard behavior: click to toggle play
+      togglePlay();
+    }
+    lastClickTimeRef.current = time;
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input or textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+      ) {
+        return;
+      }
+
+      switch (e.key) {
+        case ' ':
+        case 'k':
+          e.preventDefault();
+          togglePlay();
+          break;
+        case 'ArrowLeft':
+        case 'j':
+          e.preventDefault();
+          skip(-10);
+          break;
+        case 'ArrowRight':
+        case 'l':
+          e.preventDefault();
+          skip(10);
+          break;
+        case 'f':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 'm':
+          e.preventDefault();
+          toggleMute();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isPlaying, isMuted]); // Dependencies to ensure current state is captured
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -143,9 +240,41 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
         src={src}
         poster={poster}
         className="h-full w-full cursor-pointer object-contain"
-        onClick={togglePlay}
+        onClick={handleVideoClick}
         playsInline
       />
+
+      {/* Skip feedback overlay */}
+      {skipTime && (
+        <div 
+          key={skipTime.key}
+          className={cn(
+            "absolute inset-y-0 w-1/3 flex items-center justify-center pointer-events-none z-20",
+            skipTime.direction === 'forward' ? "right-0" : "left-0",
+            "bg-white/10"
+          )}
+          style={{
+            borderRadius: skipTime.direction === 'forward' ? '100% 0 0 100%' : '0 100% 100% 0'
+          }}
+        >
+          <div className="flex flex-col items-center gap-2 animate-out fade-out zoom-out duration-500 fill-mode-forwards">
+            <div className="bg-black/40 backdrop-blur-md text-white rounded-full p-6 shadow-2xl">
+              {skipTime.direction === 'forward' ? (
+                <div className="flex items-center">
+                  <RotateCw className="h-10 w-10 animate-in zoom-in spin-in-90 duration-300" />
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <RotateCcw className="h-10 w-10 animate-in zoom-in -spin-in-90 duration-300" />
+                </div>
+              )}
+            </div>
+            <span className="text-white font-bold text-xl drop-shadow-lg scale-110">
+              {skipTime.direction === 'forward' ? '10s' : '10s'}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Play button overlay */}
       {!isPlaying && (
@@ -195,6 +324,26 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
               {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 fill-current" />}
             </Button>
 
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => skip(-10)}
+              className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors"
+              title="Backward 10s"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => skip(10)}
+              className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors"
+              title="Forward 10s"
+            >
+              <RotateCw className="h-4 w-4" />
+            </Button>
+
             <div className="group/volume hidden sm:flex items-center">
               <Button
                 variant="ghost"
@@ -225,13 +374,33 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, onViewStart, onE
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors hidden sm:flex"
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-white hover:bg-white/20 hover:text-primary transition-colors hidden sm:flex"
+                  title="Playback Speed"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-black/90 text-white border-white/20">
+                {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
+                  <DropdownMenuItem
+                    key={speed}
+                    onClick={() => handlePlaybackSpeedChange(speed)}
+                    className={cn(
+                      "hover:bg-white/10 cursor-pointer",
+                      playbackSpeed === speed && "text-primary font-bold"
+                    )}
+                  >
+                    {speed === 1 ? 'Normal' : `${speed}x`}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
             <Button
               variant="ghost"
               size="icon"

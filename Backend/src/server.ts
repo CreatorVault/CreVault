@@ -17,7 +17,7 @@ const startServer = async () => {
 
   const io = new Server(server, {
     cors: {
-      origin: "*", // Allow all origins for now, restrict in production
+      origin: process.env.ALLOWED_ORIGIN || "http://localhost:3000",
       methods: ["GET", "POST"]
     }
   });
@@ -26,15 +26,8 @@ const startServer = async () => {
   app.set("io", io);
 
   io.on("connection", (socket: any) => {
-    console.log("New client connected:", socket.id);
-
     socket.on("join_video", (videoId: string) => {
       socket.join(`video_${videoId}`);
-      console.log(`Socket ${socket.id} joined video_${videoId}`);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Client disconnected:", socket.id);
     });
   });
 
