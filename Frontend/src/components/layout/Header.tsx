@@ -99,7 +99,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
             <Link to="/" className="flex items-center gap-2 group">
               <div className="flex h-9 w-9 items-center justify-center transition-all duration-300 group-hover:scale-110">
                 <img
-                  src="/crevault-logo.jpg"
+                  src="/CreVault_logo.png"
                   alt="CreVault Logo"
                   className="h-9 w-9 rounded-md object-cover drop-shadow-[0_0_8px_hsl(18_90%_48%/0.5)]"
                 />
