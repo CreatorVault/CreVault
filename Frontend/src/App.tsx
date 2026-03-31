@@ -18,6 +18,7 @@ import WatchLater from "./pages/WatchLater";
 import LikedVideos from "./pages/LikedVideos";
 import YourVideos from "./pages/YourVideos";
 import NotFound from "./pages/NotFound";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
               <Route path="/playlist/watch-later" element={<WatchLater />} />
               <Route path="/playlist/liked" element={<LikedVideos />} />
               <Route path="/your-videos" element={<YourVideos />} />
+              <Route path="/about" element={<About />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
