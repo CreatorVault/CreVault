@@ -19,6 +19,7 @@ import LikedVideos from "./pages/LikedVideos";
 import YourVideos from "./pages/YourVideos";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
+import HowItWorks from "./pages/HowItWorks";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
               <Route path="/playlist/liked" element={<LikedVideos />} />
               <Route path="/your-videos" element={<YourVideos />} />
               <Route path="/about" element={<About />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
